@@ -15,10 +15,28 @@ public class Recibo {
         this.fechaEmision = null;
         this.cargos = new Stack<Cargo>();
     }
-
-    public void anhadeCargo(Capitulo capitulo) {
-        cargos.push(new Cargo());
+    
+	/**
+	 * Anhade un cargo al recibo.
+	 * @param c el cargo
+	 */
+    public void anhadeCargo(Cargo c) {
+        cargos.push(c);
     }
+
+	/**
+	 * Calcula el importe total a pagar en base a los cargos del recibo.
+	 * @return el importe a pagar
+	 */
+	public double calculaImporteTotal() {
+		double total = 0;
+
+		for (Cargo c: cargos) {
+			total += c.getImporte();
+		}
+
+		return total;
+	}
 
     /****** GETTERS ******/
 
