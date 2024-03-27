@@ -31,14 +31,30 @@ public class Recibo {
 	public double calculaImporteTotal() {
 		double total = 0;
 
-		for (Cargo c: cargos) {
-			total += c.getImporte();
-		}
+		if (!cargos.isEmpty())
+			for (Cargo c: cargos)
+				total += c.getImporte();
 
 		return total;
 	}
 
-    /****** GETTERS ******/
+    @Override
+	public int hashCode() {
+		return fechaEmision.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		else if (!(o instanceof Recibo) || o == null)
+			return false;
+		else if (((Recibo)o).getFechaEmision().equals(this.fechaEmision))
+			return true;
+		else return false;
+	}
+
+	/****** GETTERS ******/
 
     public LocalDateTime getFechaEmision() {
         return fechaEmision;

@@ -4,27 +4,47 @@ import java.time.LocalDateTime;
 
 public class Cargo {
 
-	private Capitulo capitulo;
 	private LocalDateTime fechaVisualizacion;
 	private double importe;
+	private String idCapitulo;
 
 	/**
 	 * Construye el cargo de un recibo.
 	 * @param fechaVisualizacion la fecha en que se visualizo el capitulo
 	 * @param importe el importe a cobrar por la visualizacion
-	 * @param capitulo el capitulo visualizado
 	 */
 	public Cargo(LocalDateTime fechaVisualizacion, double importe,
-				 Capitulo capitulo) {
+				 String idCapitulo) {
 		this.fechaVisualizacion = fechaVisualizacion;
 		this.importe = importe;
-		this.capitulo = capitulo;
+		this.idCapitulo = idCapitulo;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((fechaVisualizacion == null) ? 0 : fechaVisualizacion.hashCode());
+		result = prime * result + ((idCapitulo == null) ? 0 : idCapitulo.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		else if (!(o instanceof Cargo) || o == null)
+			return false;
+		else if (((Cargo) o).getFechaVisualizacion().equals(this.fechaVisualizacion) &&
+				((Cargo)o).getIdCapitulo() == this.idCapitulo)
+			return true;
+		else return false;
 	}
 
 	/****** GETTERS ******/
 
-	public Capitulo getCapitulo() {
-		return capitulo;
+	public String getIdCapitulo() {
+		return idCapitulo;
 	}
 
 	public LocalDateTime getFechaVisualizacion() {
@@ -37,8 +57,8 @@ public class Cargo {
 
 	/****** SETTERS ******/
 	
-	public void setCapitulo(Capitulo capitulo) {
-		this.capitulo = capitulo;
+	public void setIdCapitulo(String idCapitulo) {
+		this.idCapitulo = idCapitulo;
 	}
 
 	public void setFechaVisualizacion(LocalDateTime fechaVisualizacion) {
@@ -48,4 +68,5 @@ public class Cargo {
 	public void setImporte(double importe) {
 		this.importe = importe;
 	}
+
 }

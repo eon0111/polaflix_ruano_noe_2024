@@ -1,9 +1,12 @@
 package localdomain.nruano.empresariales.polaflix_ruano_noe_2024;
 
+import java.util.HashMap;
+
 public class Temporada {
     
     private int indice;
     private Serie serie;
+	private HashMap<String, Capitulo> capitulos;
 
     /**
      * Construye una temporada.
@@ -13,9 +16,32 @@ public class Temporada {
     public Temporada(int indice, Serie serie) {
         this.indice = indice;
         this.serie = serie;
+		this.capitulos = new HashMap<String, Capitulo>();
     }
 
-    /****** GETTERS ******/
+
+    @Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + indice;
+		result = prime * result + ((serie == null) ? 0 : serie.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		else if (!(o instanceof Temporada) || o == null)
+			return false;
+		else if (((Temporada)o).getSerie().equals(this.serie) &&
+				((Temporada) o).getIndice() == this.indice)
+			return true;
+		else return false;
+	}
+
+	/****** GETTERS ******/
 
     public int getIndice() {
         return indice;
@@ -24,6 +50,14 @@ public class Temporada {
     public Serie getSerie() {
         return serie;
     }
+
+	public HashMap<String, Capitulo> getCapitulos() {
+		return capitulos;
+	}
+
+	public Capitulo getCapitulo(String id) {
+		return capitulos.get(id);
+	}
 
     /****** SETTERS ******/
 
@@ -34,5 +68,9 @@ public class Temporada {
     public void setSerie(Serie serie) {
         this.serie = serie;
     }
+
+	public void addCapitulo(Capitulo c) {
+		this.capitulos.put(c.getId(), c);
+	}
 
 }

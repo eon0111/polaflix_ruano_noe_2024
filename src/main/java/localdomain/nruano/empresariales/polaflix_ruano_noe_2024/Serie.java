@@ -10,7 +10,8 @@ public class Serie {
 	private CategoriaSerie categoria;
 	private String sinopsis;
 	private ArrayList<Temporada> temporadas;
-	private Set<PersonalSerie> personalSerie;
+	private Set<PersonalSerie> creadores;
+	private Set<PersonalSerie> actores;
 
 	/**
 	 * Construye una serie.
@@ -28,15 +29,29 @@ public class Serie {
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		else if (!(o instanceof Serie) || o == null)
-			return false;
-		else if (((Serie)o).getId() == this.id)
-			return true;
-		else return false;
+	public int hashCode() {
+		return id.hashCode();
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+
+		Serie other = (Serie) obj;
+		if (id == null && (other.id != null))
+			return false;
+		else if (!id.equals(other.id))
+			return false;
+		
+		return true;
+	}
+
+	
 
 	/****** GETTERS ******/
 
@@ -64,8 +79,12 @@ public class Serie {
 		return temporadas.size();
 	}
 
-	public Set<PersonalSerie> getPersonalSerie() {
-		return personalSerie;
+	public Set<PersonalSerie> getCreadores() {
+		return creadores;
+	}
+
+	public Set<PersonalSerie> getActores() {
+		return actores;
 	}
 
 	/****** SETTERS ******/
@@ -90,8 +109,12 @@ public class Serie {
 		this.temporadas.add(temporada);
 	}
 
-	public void addPersonalSerie(PersonalSerie personalSerie) {
-		this.personalSerie.add(personalSerie);
+	public void addCreador(PersonalSerie c) {
+		this.creadores.add(c);
+	}
+
+	public void addActor(PersonalSerie a) {
+		this.actores.add(a);
 	}
 
 }

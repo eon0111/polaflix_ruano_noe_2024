@@ -19,7 +19,7 @@ public class Usuario {
 	private boolean cuotaFija;
 	private String iban;
 	private Stack<Recibo> recibos;
-	private Set<Capitulo> capitulosVistos;
+	private Set<String> capitulosVistos;
 	private Set<Serie> seriesTerminadas;
 	private Set<Serie> seriesPendientes;
 	private Set<Serie> seriesEmpezadas;
@@ -53,10 +53,12 @@ public class Usuario {
 
 		// Se anhade la visualizacion del capitulo al ultimo recibo
 		recibos.lastElement().anhadeCargo(
-				new Cargo(LocalDateTime.now(), (cuotaFija) ? CUOTA_FIJA : importe, c));
+				new Cargo(LocalDateTime.now(),
+						(cuotaFija) ? CUOTA_FIJA : importe,
+						c.getId()));
 
 		// Se registra la visualizacion del capitulo
-		if(!capitulosVistos.contains(c)) capitulosVistos.add(c);
+		if(!capitulosVistos.contains(c.getId())) capitulosVistos.add(c.getId());
 	}
 
 	/**
@@ -70,30 +72,21 @@ public class Usuario {
 	public Temporada getUltimaTemporadaSerie(Serie s) {
 		if (seriesEmpezadas.contains(s)) {
 			int mayorIndiceTemporada = 0;
-			Temporada temporadaTmp;
 
-			/* Busca entre todos los capitulos visualizados por el usuario, quel
+			/* Busca entre todos los capitulos visualizados por el usuario, aquel
 			 * que pertenezca a la temporada con mayor indice */
-			for(Capitulo c: capitulosVistos) {
-				temporadaTmp = c.getTemporada();
-				
-				if (temporadaTmp.getSerie().equals(s) &&
-						c.getIndice() > mayorIndiceTemporada) {
-					mayorIndiceTemporada = temporadaTmp.getIndice();
+			for (Temporada t: s.getTemporadas()) {
+				for (String id: capitulosVistos) {
+					if (t.getCapitulo(id) != null && t.getIndice() > mayorIndiceTemporada)
+						mayorIndiceTemporada = t.getIndice();
 				}
-
-				/* Se deja de iterar cuando se ha llegado a un capitulo de la
-				 * ultima temporada */
-				if (mayorIndiceTemporada == s.getNumTemporadas()) break;
 			}
-
-			return s.getTemporadas().get(mayorIndiceTemporada);
 		} else if (seriesPendientes.contains(s) || seriesTerminadas.contains(s)) {
 			/* Si no es una serie empezada se retorna la primera temporada */
 			return s.getTemporadas().getFirst();
-		} else {
-			return null;
 		}
+
+		return null;
 	}
 
 	/**
@@ -104,6 +97,29 @@ public class Usuario {
 		if (!seriesPendientes.contains(s)) {
 			seriesPendientes.add(s);
 		}
+	}
+
+	@Override
+	public int hashCode() {
+		return nombre.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+
+		Usuario other = (Usuario) obj;
+		if (nombre == null && other.nombre != null)
+			return false;
+		else if (nombre != other.nombre)
+			return false;
+		
+		return true;
 	}
 
 	/****** GETTERS ******/
@@ -124,7 +140,7 @@ public class Usuario {
 		return iban;
 	}
 
-	public Set<Capitulo> getCapitulosVistos() {
+	public Set<String> getCapitulosVistos() {
 		return capitulosVistos;
 	}
 
@@ -156,6 +172,11 @@ public class Usuario {
 
 	public void setIban(String iban) {
 		this.iban = iban;
+	}
+
+	public void addRecibo() {
+		recibos.lastElement().setFechaEmision(LocalDateTime.now());
+		recibos.push(new Recibo());
 	}
 
 }
