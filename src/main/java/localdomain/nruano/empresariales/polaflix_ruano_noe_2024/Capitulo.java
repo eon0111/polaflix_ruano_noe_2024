@@ -1,14 +1,29 @@
 package localdomain.nruano.empresariales.polaflix_ruano_noe_2024;
 
+import java.util.UUID;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
+
+@Entity
 public class Capitulo {
-    
-	private String id;
+
+    @Id
+    @GeneratedValue (strategy = GenerationType.AUTO)
+    private UUID id;
+
     private int indice;
+
+    @OneToOne
+    private Temporada temporada;
+    
     private String titulo;
     private String enlace;
     private String descripcion;
-    private Temporada temporada;
-
+    
     /**
      * Construye un capitulo.
 	 * @param id el identificador del capitulo
@@ -18,10 +33,8 @@ public class Capitulo {
      * @param descripcion la sinopsis del capitulo
      * @param temporada la temporada a la que pertenece el capitulo
      */
-    public Capitulo(String id, int indice, String titulo, String enlace,
-					String descripcion, Temporada temporada) {
-		this.id = id;
-        this.indice = indice;
+    public Capitulo(String titulo, String enlace, String descripcion,
+                    Temporada temporada) {
         this.titulo = titulo;
         this.enlace = enlace;
         this.descripcion = descripcion;
@@ -29,33 +42,38 @@ public class Capitulo {
     }
 
 	@Override
-	public int hashCode() {
-		return id.hashCode();
-	}
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + indice;
+        result = prime * result + ((temporada == null) ? 0 : temporada.hashCode());
+        return result;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Capitulo other = (Capitulo) obj;
+        if (indice != other.indice)
+            return false;
+        if (temporada == null) {
+            if (other.temporada != null)
+                return false;
+        } else if (!temporada.equals(other.temporada))
+            return false;
+        return true;
+    }
 
-		Capitulo other = (Capitulo) obj;
-		if (id == null && other.id != null)
-			return false;
-		if (!id.equals(other.id))
-			return false;
+    /****** GETTERS ******/
 
-		return true;
-	}
-
-	/****** GETTERS ******/
-
-	public String getId() {
-		return id;
-	}
+    public UUID getId() {
+        return id;
+    }
 
 	public int getIndice() {
 		return indice;
@@ -78,10 +96,6 @@ public class Capitulo {
     }
 
 	/****** SETTERS ******/
-
-	public void setId(String id) {
-		this.id = id;
-	}
 
     public void setIndice(int indice) {
         this.indice = indice;

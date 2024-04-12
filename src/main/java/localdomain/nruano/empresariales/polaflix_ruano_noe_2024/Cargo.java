@@ -1,23 +1,27 @@
 package localdomain.nruano.empresariales.polaflix_ruano_noe_2024;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
+import jakarta.persistence.Embeddable;
+
+@Embeddable
 public class Cargo {
 
 	private LocalDateTime fechaVisualizacion;
+	private UUID idCapitulo;
 	private double importe;
-	private String idCapitulo;
 
 	/**
 	 * Construye el cargo de un recibo.
 	 * @param fechaVisualizacion la fecha en que se visualizo el capitulo
 	 * @param importe el importe a cobrar por la visualizacion
 	 */
-	public Cargo(LocalDateTime fechaVisualizacion, double importe,
-				 String idCapitulo) {
+	public Cargo(LocalDateTime fechaVisualizacion, UUID idCapitulo,
+				 double importe) {
 		this.fechaVisualizacion = fechaVisualizacion;
-		this.importe = importe;
 		this.idCapitulo = idCapitulo;
+		this.importe = importe;
 	}
 
 	@Override
@@ -43,7 +47,7 @@ public class Cargo {
 
 	/****** GETTERS ******/
 
-	public String getIdCapitulo() {
+	public UUID getIdCapitulo() {
 		return idCapitulo;
 	}
 
@@ -57,7 +61,7 @@ public class Cargo {
 
 	/****** SETTERS ******/
 	
-	public void setIdCapitulo(String idCapitulo) {
+	public void setIdCapitulo(UUID idCapitulo) {
 		this.idCapitulo = idCapitulo;
 	}
 

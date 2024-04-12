@@ -2,15 +2,33 @@ package localdomain.nruano.empresariales.polaflix_ruano_noe_2024;
 
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.UUID;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+
+@Entity
 public class Serie {
 
-	private String id;
+	@Id
+	@GeneratedValue (strategy = GenerationType.AUTO)
+	private UUID id;
+
 	private String titulo;
 	private CategoriaSerie categoria;
 	private String sinopsis;
+
+	@OneToMany
 	private ArrayList<Temporada> temporadas;
+
+	@ManyToMany
 	private Set<PersonalSerie> creadores;
+
+	@ManyToMany
 	private Set<PersonalSerie> actores;
 
 	/**
@@ -20,9 +38,7 @@ public class Serie {
 	 * @param categoria la categoria de la serie
 	 * @param sinopsis la sinopsis de la serie
 	 */
-	public Serie(String id, String titulo, CategoriaSerie categoria,
-				 String sinopsis) {
-		this.id = id;
+	public Serie(String titulo, CategoriaSerie categoria, String sinopsis) {
 		this.titulo = titulo;
 		this.categoria = categoria;
 		this.sinopsis = sinopsis;
@@ -51,11 +67,9 @@ public class Serie {
 		return true;
 	}
 
-	
-
 	/****** GETTERS ******/
 
-	public String getId() {
+	public UUID getId() {
 		return id;
 	}
 
@@ -88,10 +102,6 @@ public class Serie {
 	}
 
 	/****** SETTERS ******/
-
-	public void setId(String id) {
-		this.id = id;
-	}
 
 	public void setTitulo(String titulo) {
 		this.titulo = titulo;

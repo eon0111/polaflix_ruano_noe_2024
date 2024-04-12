@@ -1,29 +1,46 @@
-// TODO: manejar casos de error por medio de excepciones (?)
-
 package localdomain.nruano.empresariales.polaflix_ruano_noe_2024;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.Stack;
+import java.util.UUID;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
+
+@Entity
 public class Usuario {
 
+	@Id
+	private String nombre;
+
+	private String contrasenha;
+	private boolean cuotaFija;
+	private String iban;
+
+	@OneToMany
+	private Stack<Recibo> recibos;
+
+	@ManyToMany
+	private Set<UUID> capitulosVistos;
+
+	@ManyToMany
+	private Set<Serie> seriesTerminadas;
+	
+	@ManyToMany
+	private Set<Serie> seriesPendientes;
+	
+	@ManyToMany
+	private Set<Serie> seriesEmpezadas;
+	
 	/* Costes de las visualizaciones en funcion del tipo de serie o la suscripcion */
 	private static final double CUOTA_FIJA = 20.0;
 	private static final double PRECIO_ESTANDAR = 0.5;
 	private static final double PRECIO_SILVER = 0.75;
 	private static final double PRECIO_GOLD = 1.5;
 
-	private String nombre;
-	private String contrasenha;
-	private boolean cuotaFija;
-	private String iban;
-	private Stack<Recibo> recibos;
-	private Set<String> capitulosVistos;
-	private Set<Serie> seriesTerminadas;
-	private Set<Serie> seriesPendientes;
-	private Set<Serie> seriesEmpezadas;
-	
 	/**
 	 * Construye un nuevo usuario.
 	 * @param nombre El nombre del usuario
@@ -54,8 +71,8 @@ public class Usuario {
 		// Se anhade la visualizacion del capitulo al ultimo recibo
 		recibos.lastElement().anhadeCargo(
 				new Cargo(LocalDateTime.now(),
-						(cuotaFija) ? CUOTA_FIJA : importe,
-						c.getId()));
+						  c.getId(),
+						  (cuotaFija) ? CUOTA_FIJA : importe));
 
 		// Se registra la visualizacion del capitulo
 		if(!capitulosVistos.contains(c.getId())) capitulosVistos.add(c.getId());
@@ -76,7 +93,7 @@ public class Usuario {
 			/* Busca entre todos los capitulos visualizados por el usuario, aquel
 			 * que pertenezca a la temporada con mayor indice */
 			for (Temporada t: s.getTemporadas()) {
-				for (String id: capitulosVistos) {
+				for (UUID id: capitulosVistos) {
 					if (t.getCapitulo(id) != null && t.getIndice() > mayorIndiceTemporada)
 						mayorIndiceTemporada = t.getIndice();
 				}
@@ -140,7 +157,7 @@ public class Usuario {
 		return iban;
 	}
 
-	public Set<String> getCapitulosVistos() {
+	public Set<UUID> getCapitulosVistos() {
 		return capitulosVistos;
 	}
 

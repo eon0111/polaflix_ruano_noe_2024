@@ -3,9 +3,15 @@ package localdomain.nruano.empresariales.polaflix_ruano_noe_2024;
 import java.time.LocalDateTime;
 import java.util.Stack;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+
+@Entity
 public class Recibo {
     
     private LocalDateTime fechaEmision;
+
+	@OneToMany
     private Stack<Cargo> cargos;
 
     /**

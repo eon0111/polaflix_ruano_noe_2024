@@ -1,12 +1,28 @@
 package localdomain.nruano.empresariales.polaflix_ruano_noe_2024;
 
 import java.util.HashMap;
+import java.util.UUID;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+
+@Entity
 public class Temporada {
     
+	@Id
+	@GeneratedValue (strategy = GenerationType.AUTO)	// FIXME: igual hay que poner IDENTITY en todas las clases
+	private UUID id;
     private int indice;
+
+	@ManyToOne
     private Serie serie;
-	private HashMap<String, Capitulo> capitulos;
+
+	@OneToMany
+	private HashMap<UUID, Capitulo> capitulos;
 
     /**
      * Construye una temporada.
@@ -16,7 +32,7 @@ public class Temporada {
     public Temporada(int indice, Serie serie) {
         this.indice = indice;
         this.serie = serie;
-		this.capitulos = new HashMap<String, Capitulo>();
+		this.capitulos = new HashMap<UUID, Capitulo>();
     }
 
 
@@ -51,11 +67,11 @@ public class Temporada {
         return serie;
     }
 
-	public HashMap<String, Capitulo> getCapitulos() {
+	public HashMap<UUID, Capitulo> getCapitulos() {
 		return capitulos;
 	}
 
-	public Capitulo getCapitulo(String id) {
+	public Capitulo getCapitulo(UUID id) {
 		return capitulos.get(id);
 	}
 
