@@ -37,11 +37,12 @@ public class Capitulo {
      * @param temporada la temporada a la que pertenece el capitulo
      */
     public Capitulo(String titulo, String enlace, String descripcion,
-                    Temporada temporada) {
+                    Temporada temporada, int indice) {
         this.titulo = titulo;
         this.enlace = enlace;
         this.descripcion = descripcion;
         this.temporada = temporada;
+        this.indice = indice;
     }
 
 	@Override

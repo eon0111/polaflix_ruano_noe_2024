@@ -2,7 +2,9 @@ package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.dominio;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.Stack;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -58,7 +60,9 @@ public class Usuario {
 		this.contrasenha = contrasenha;
 		this.cuotaFija = cuotaFija;
 		this.iban = iban;
-		this.recibos = new ArrayList<Recibo>();
+		this.recibos = new Stack<Recibo>();
+		recibos.addLast(new Recibo());
+		this.capitulosVistos = new HashSet<Long>();
 	}
 
 	/**

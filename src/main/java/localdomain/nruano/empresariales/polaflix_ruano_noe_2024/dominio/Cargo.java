@@ -11,6 +11,11 @@ public class Cargo {
 	private long idCapitulo;
 	private double importe;
 
+	/*
+	 * Constructor Vacío
+	 */
+	protected Cargo() { }
+
 	/**
 	 * Construye el cargo de un recibo.
 	 * @param fechaVisualizacion la fecha en que se visualizo el capitulo

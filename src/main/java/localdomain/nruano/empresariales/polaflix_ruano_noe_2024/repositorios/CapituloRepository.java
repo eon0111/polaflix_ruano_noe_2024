@@ -10,12 +10,12 @@ import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.dominio.Capitulo
 public interface CapituloRepository extends JpaRepository<Capitulo, Long> {
 
     @Query("SELECT c FROM Capitulo c WHERE c.temporada.serie.id = ?1 AND c.temporada.indice = ?2")
-    public ArrayList<Capitulo> findByIdSerieAndIndiceTemporada(long idSerie, int indiceTemporada);
+    public ArrayList<Capitulo> findByIdSerieAndIndTemp(long idSerie, int indiceTemporada);
 
     @Query("SELECT c FROM Capitulo c WHERE c.temporada.serie.titulo = ?1 AND c.temporada.indice = ?2")
-    public ArrayList<Capitulo> findByTituloSerieAndIndiceTemporada(String tituloSerie, int indiceTemporada);
+    public ArrayList<Capitulo> findByTituloSerieAndIndTemp(String tituloSerie, int indiceTemporada);
 
     @Query("SELECT c FROM Capitulo c WHERE c.temporada.serie.titulo = ?1 AND c.temporada.indice = ?2 AND c.indice = ?3")
-    public Capitulo findByTitSerieAndIndTempAndIndCap(String titSerie, int indTemp, int indCap);
+    public Capitulo findByTituloSerieAndIndTempAndIndCap(String titSerie, int indTemp, int indCap);
 
 }

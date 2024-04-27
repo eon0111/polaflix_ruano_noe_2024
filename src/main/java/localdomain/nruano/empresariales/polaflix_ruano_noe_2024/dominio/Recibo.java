@@ -2,7 +2,7 @@ package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.dominio;
 
 import java.time.LocalDateTime;
 import java.util.Stack;
-import java.util.UUID;
+import java.util.List;
 
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -16,19 +16,23 @@ public class Recibo {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private UUID id;
-    
+	private long id;
+	
+	private double importe;
+	private LocalDateTime fechaCreacion;
     private LocalDateTime fechaEmision;
 
 	@ElementCollection(fetch = FetchType.LAZY)
-    private Stack<Cargo> cargos;
+    private List<Cargo> cargos;
 
     /**
      * Construye un recibo.
      */
     public Recibo() {
+		this.fechaCreacion = LocalDateTime.now();
         this.fechaEmision = null;
         this.cargos = new Stack<Cargo>();
+		this.importe = 0;
     }
     
 	/**
@@ -36,7 +40,8 @@ public class Recibo {
 	 * @param c el cargo
 	 */
     public void anhadeCargo(Cargo c) {
-        cargos.push(c);
+        cargos.addLast(c);
+		importe += c.getImporte();
     }
 
 	/**
@@ -53,36 +58,66 @@ public class Recibo {
 		return total;
 	}
 
-    @Override
+	@Override
 	public int hashCode() {
-		return fechaEmision.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (id ^ (id >>> 32));
+		return result;
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		else if (!(o instanceof Recibo) || o == null)
+		if (obj == null)
 			return false;
-		else if (((Recibo)o).getFechaEmision().equals(this.fechaEmision))
-			return true;
-		else return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Recibo other = (Recibo) obj;
+		if (id != other.id)
+			return false;
+		return true;
 	}
 
 	/****** GETTERS ******/
 
-    public LocalDateTime getFechaEmision() {
+	public long getId() {
+		return id;
+	}
+
+	public LocalDateTime getFechaCreacion() {
+        return fechaCreacion;
+    }
+
+	public LocalDateTime getFechaEmision() {
         return fechaEmision;
     }
 
-    public Stack<Cargo> getCargos() {
+    public List<Cargo> getCargos() {
         return cargos;
     }
 
+	public double getImporte() {
+		return this.importe;
+	}
+
     /****** SETTERS ******/
+
+	public void setId(long id) {
+		this.id = id;
+	}
+
+	public void setFechaCreacion(LocalDateTime fechaCreacion) {
+        this.fechaCreacion = fechaCreacion;
+    }
 
     public void setFechaEmision(LocalDateTime fechaEmision) {
         this.fechaEmision = fechaEmision;
     }
+
+	public void setCargos(Stack<Cargo> cargos) {
+		this.cargos = cargos;
+	}
 
 }
