@@ -120,4 +120,8 @@ public class Recibo {
 		this.cargos = cargos;
 	}
 
+	public void setImporte(double importe) {
+		this.importe = importe;
+	}
+
 }

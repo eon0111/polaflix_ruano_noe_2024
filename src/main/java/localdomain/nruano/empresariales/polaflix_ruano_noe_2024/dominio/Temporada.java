@@ -16,7 +16,7 @@ import jakarta.persistence.OneToMany;
 public class Temporada {
     
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)	// FIXME: igual hay que poner IDENTITY en todas las clases
+	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
     private int indice;
 
@@ -41,7 +41,6 @@ public class Temporada {
         this.serie = serie;
 		this.capitulos = new HashMap<Long, Capitulo>();
     }
-
 
     @Override
 	public int hashCode() {
@@ -80,6 +79,10 @@ public class Temporada {
 
 	public Capitulo getCapitulo(long id) {
 		return capitulos.get(id);
+	}
+
+	public int getNumCapitulos() {
+		return capitulos.size();
 	}
 
     /****** SETTERS ******/

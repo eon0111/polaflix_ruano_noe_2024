@@ -3,7 +3,6 @@ package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.dominio;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.Stack;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -60,9 +59,14 @@ public class Usuario {
 		this.contrasenha = contrasenha;
 		this.cuotaFija = cuotaFija;
 		this.iban = iban;
+
 		this.recibos = new Stack<Recibo>();
 		recibos.addLast(new Recibo());
+
 		this.capitulosVistos = new HashSet<Long>();
+		this.seriesEmpezadas = new HashSet<Serie>();
+		this.seriesPendientes = new HashSet<Serie>();
+		this.seriesTerminadas = new HashSet<Serie>();
 	}
 
 	/**
@@ -70,7 +74,11 @@ public class Usuario {
 	 * al recibo del usuario.
 	 */
 	public void registraVisualizacion(Capitulo c) {
-		CategoriaSerie categoria = c.getTemporada().getSerie().getCategoria();
+		Serie sTmp = c.getTemporada().getSerie();
+
+		if (!seriesEmpezadas.contains(sTmp)) seriesEmpezadas.add(sTmp);
+
+		CategoriaSerie categoria = sTmp.getCategoria();
 		double importe = (cuotaFija) ? CUOTA_FIJA :
 						((categoria == CategoriaSerie.ESTANDAR)	? PRECIO_ESTANDAR :
 						((categoria == CategoriaSerie.GOLD)		? PRECIO_GOLD :
@@ -80,7 +88,11 @@ public class Usuario {
 		recibos.getLast().anhadeCargo(
 				new Cargo(LocalDateTime.now(),
 						  c.getId(),
-						  (cuotaFija) ? CUOTA_FIJA : importe));
+						  (cuotaFija) ? 0 : importe));
+
+		/* Se anhade la serie a la que pertenece el capítulo al listado de
+		 * series vistas si el capítulo es el último de la serie */
+		if (c.isUltimoCapituloSerie()) seriesTerminadas.add(c.getTemporada().getSerie());
 
 		// Se registra la visualizacion del capitulo
 		if(!capitulosVistos.contains(c.getId())) capitulosVistos.add(c.getId());
@@ -209,6 +221,7 @@ public class Usuario {
 
 	public void addRecibo() {
 		recibos.getLast().setFechaEmision(LocalDateTime.now());
+		if (cuotaFija) recibos.getLast().setImporte(CUOTA_FIJA);
 		recibos.addLast(new Recibo());
 	}
 

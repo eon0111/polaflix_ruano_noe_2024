@@ -175,7 +175,7 @@ public class AppFeeder implements CommandLineRunner {
 
 	/****** TEST Usuario ******************************************************/
 	private void muestraRecibosUsuario(Usuario u) {
-		System.out.println("[*] Recibos del usuario \"" + u.getNombre() + "\":");
+		System.out.println("\n[*] Recibos del usuario \"" + u.getNombre() + "\":");
 
 		Capitulo cTmp;
 		Serie sTmp;
@@ -202,17 +202,35 @@ public class AppFeeder implements CommandLineRunner {
 	}
 
 	private void muestraVisualizacionesUsuario(Usuario u) {
-		System.out.println("[*] Visualizaciones del usuario \"" + u.getNombre() + "\":");
+		System.out.println("\n[*] Visualizaciones del usuario \"" + u.getNombre() + "\":");
 		Capitulo cTmp;
 		for (long idCapitulo: u.getCapitulosVistos()) {
 			cTmp = cr.getReferenceById(idCapitulo);
-			System.out.println("\t>> \"" +
+			System.out.println("  >> \"" +
 					cTmp.getTemporada().getSerie().getTitulo() + "\": \"" +
 					cTmp.getTitulo() + "\"");
 		}
 	}
 
+	private void muestraSeriesUsuario(Usuario u) {
+		System.out.println("\n[*] Series del usuario \"" + u.getNombre() + "\":");
+
+		System.out.println("  >> Series terminadas:");
+		for (Serie s: u.getSeriesTerminadas())
+			System.out.println("    - \"" + s.getTitulo() + "\"");
+
+		System.out.println("  >> Series pendientes:");
+		for (Serie s: u.getSeriesPendientes())
+			System.out.println("    - \"" + s.getTitulo() + "\"");
+
+		System.out.println("  >> Series empezadas:");
+		for (Serie s: u.getSeriesEmpezadas())
+			System.out.println("    - \"" + s.getTitulo() + "\"");
+	}
+
 	private void testUsuario() {
+		System.out.println("Temporadas de Mr. Robot: " + sr.findByTitulo("Mr. Robot").getNumTemporadas());
+
 		Usuario u = ur.findByNombre("pacoloco");
 		System.out.println("Usuario: \"" + u.getNombre() + "\"");
 
@@ -226,26 +244,39 @@ public class AppFeeder implements CommandLineRunner {
 		muestraVisualizacionesUsuario(u);
 		muestraRecibosUsuario(u);
 
-		System.out.println("==========================================");
+		System.out.println("\n==========================================");
 
 		/* Emite un recibo */
-		System.out.println("[*] Emitiendo último recibo");
+		System.out.println("\n[*] Emitiendo último recibo");
 		u.addRecibo();
 
 		/* Comprueba los recibos del usuario para ver que la fecha de emisión se
 		 * registra correctamente */
 		muestraRecibosUsuario(u);
 
-		System.out.println("==========================================");
+		System.out.println("\n==========================================");
+
+		/* Muestra las series del usuario antes de registrar la visualización
+		 * del último capítulo de una de ellas */
+		muestraSeriesUsuario(u);
 
 		/* Registra visualizaciones de capítulos de una serie SILVER */
+		System.out.println("\n[*] Registrando visualizaciones: Young Sheldon - (01x01, 02x01, 03x03)");
 		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Young Sheldon", 1, 1));
 		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Young Sheldon", 2, 1));
-		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Young Sheldon", 3, 1));
+		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Young Sheldon", 3, 3));
 
-		/* Comprueba las visualizaciones y los recibos del usuario */
+		/* Comprueba las visualizaciones y los recibos del usuario, así como sus
+		 * series con objeto de comprobar si se ha registrado la serie como
+		 * terminada, al haber sido visualizado su último capítulo */
 		muestraVisualizacionesUsuario(u);
 		muestraRecibosUsuario(u);
+		muestraSeriesUsuario(u);
+
+		System.out.println("\n==========================================");
+
+		/* Anhade una serie pendiente */
+		u.addSeriePendiente(sr.findByTitulo("Peaky Blinders"));
 	}
 
 	/****** FEED usuarios *****************************************************/
@@ -258,74 +289,101 @@ public class AppFeeder implements CommandLineRunner {
 
 	/****** FEED series *******************************************************/
 	private void feedSeries() {
+		/* -- Series -- */
 		Serie s1 = new Serie("Mr. Robot", CategoriaSerie.GOLD, "Mr. Robot is a techno thriller that follows Elliot, a young programmer...");
 		Serie s2 = new Serie("Young Sheldon", CategoriaSerie.SILVER, "For 9-year-old Sheldon Cooper, being a once-in-a-generation mind...");
 		Serie s3 = new Serie("The Office", CategoriaSerie.ESTANDAR, "In this US adaptation of iconic British sitcom `The Office'...");
+
+		/* Registro de las series en la BD */
 		sr.save(s1); sr.save(s2); sr.save(s3);
 
 		/* -- Temporadas -- */
 		Temporada t1s1 = new Temporada(1, s1);
 		Temporada t2s1 = new Temporada(2, s1);
 		Temporada t3s1 = new Temporada(3, s1);
-		tr.save(t1s1); tr.save(t2s1); tr.save(t3s1);
 
 		Temporada t1s2 = new Temporada(1, s2);
 		Temporada t2s2 = new Temporada(2, s2);
 		Temporada t3s2 = new Temporada(3, s2);
-		tr.save(t1s2); tr.save(t2s2); tr.save(t3s2);
 
 		Temporada t1s3 = new Temporada(1, s3);
 		Temporada t2s3 = new Temporada(2, s3);
 		Temporada t3s3 = new Temporada(3, s3);
+
+		/* Registro de las temporadas en la BD */
+		tr.save(t1s1); tr.save(t2s1); tr.save(t3s1);
+		tr.save(t1s2); tr.save(t2s2); tr.save(t3s2);
 		tr.save(t1s3); tr.save(t2s3); tr.save(t3s3);
 
 		/* -- Capitulos@s1 -- */
 		Capitulo c1t1s1 = new Capitulo("01x01", "URLc1t1s1", "DESCc1t1s1", t1s1, 1);
 		Capitulo c2t1s1 = new Capitulo("01x02", "URLc2t1s1", "DESCc2t1s1", t1s1, 2);
 		Capitulo c3t1s1 = new Capitulo("01x03", "URLc3t1s1", "DESCc3t1s1", t1s1, 3);
-		cr.save(c1t1s1); cr.save(c2t1s1); cr.save(c3t1s1);
-
+		
 		Capitulo c1t2s1 = new Capitulo("02x01", "URLc1t2s1", "DESCc1t2s1", t2s1, 1);
 		Capitulo c2t2s1 = new Capitulo("02x02", "URLc2t2s1", "DESCc2t2s1", t2s1, 2);
 		Capitulo c3t2s1 = new Capitulo("02x03", "URLc3t2s1", "DESCc3t2s1", t2s1, 3);
-		cr.save(c1t2s1); cr.save(c2t2s1); cr.save(c3t2s1);
 
 		Capitulo c1t3s1 = new Capitulo("03x01", "URLc1t3s1", "DESCc1t3s1", t3s1, 1);
 		Capitulo c2t3s1 = new Capitulo("03x02", "URLc2t3s1", "DESCc2t3s1", t3s1, 2);
 		Capitulo c3t3s1 = new Capitulo("03x03", "URLc3t3s1", "DESCc3t3s1", t3s1, 3);
-		cr.save(c1t3s1); cr.save(c2t3s1); cr.save(c3t3s1);
 
 		/* -- Capitulos@s2 -- */
 		Capitulo c1t1s2 = new Capitulo("01x01", "URLc1t1s2", "DESCc1t1s2", t1s2, 1);
 		Capitulo c2t1s2 = new Capitulo("01x02", "URLc2t1s2", "DESCc2t1s2", t1s2, 2);
 		Capitulo c3t1s2 = new Capitulo("01x03", "URLc3t1s2", "DESCc3t1s2", t1s2, 3);
-		cr.save(c1t1s2); cr.save(c2t1s2); cr.save(c3t1s2);
 
 		Capitulo c1t2s2 = new Capitulo("02x01", "URLc1t2s2", "DESCc1t2s2", t2s2, 1);
 		Capitulo c2t2s2 = new Capitulo("02x02", "URLc2t2s2", "DESCc2t2s2", t2s2, 2);
 		Capitulo c3t2s2 = new Capitulo("02x03", "URLc3t2s2", "DESCc3t2s2", t2s2, 3);
-		cr.save(c1t2s2); cr.save(c2t2s2); cr.save(c3t2s2);
 
 		Capitulo c1t3s2 = new Capitulo("03x01", "URLc1t3s2", "DESCc1t3s2", t3s2, 1);
 		Capitulo c2t3s2 = new Capitulo("03x02", "URLc2t3s2", "DESCc2t3s2", t3s2, 2);
 		Capitulo c3t3s2 = new Capitulo("03x03", "URLc3t3s2", "DESCc3t3s2", t3s2, 3);
-		cr.save(c1t3s2); cr.save(c2t3s2); cr.save(c3t3s2);
 
 		/* -- Capitulos@s3 -- */
 		Capitulo c1t1s3 = new Capitulo("01x01", "URLc1t1s3", "DESCc1t1s3", t1s3, 1);
 		Capitulo c2t1s3 = new Capitulo("01x02", "URLc2t1s3", "DESCc2t1s3", t1s3, 2);
 		Capitulo c3t1s3 = new Capitulo("01x03", "URLc3t1s3", "DESCc3t1s3", t1s3, 3);
-		cr.save(c1t1s3); cr.save(c2t1s3); cr.save(c3t1s3);
 
 		Capitulo c1t2s3 = new Capitulo("02x01", "URLc1t2s3", "DESCc1t2s3", t2s3, 1);
 		Capitulo c2t2s3 = new Capitulo("02x02", "URLc2t2s3", "DESCc2t2s3", t2s3, 2);
 		Capitulo c3t2s3 = new Capitulo("02x03", "URLc3t2s3", "DESCc3t2s3", t2s3, 3);
-		cr.save(c1t2s3); cr.save(c2t2s3); cr.save(c3t2s3);
 
 		Capitulo c1t3s3 = new Capitulo("03x01", "URLc1t3s3", "DESCc1t3s3", t3s3, 1);
 		Capitulo c2t3s3 = new Capitulo("03x02", "URLc2t3s3", "DESCc2t3s3", t3s3, 2);
 		Capitulo c3t3s3 = new Capitulo("03x03", "URLc3t3s3", "DESCc3t3s3", t3s3, 3);
+
+		/* Registro de los capítulos en la BD */
+		cr.save(c1t1s1); cr.save(c2t1s1); cr.save(c3t1s1);
+		cr.save(c1t2s1); cr.save(c2t2s1); cr.save(c3t2s1);
+		cr.save(c1t3s1); cr.save(c2t3s1); cr.save(c3t3s1);
+
+		cr.save(c1t1s2); cr.save(c2t1s2); cr.save(c3t1s2);
+		cr.save(c1t2s2); cr.save(c2t2s2); cr.save(c3t2s2);
+		cr.save(c1t3s2); cr.save(c2t3s2); cr.save(c3t3s2);
+
+		cr.save(c1t1s3); cr.save(c2t1s3); cr.save(c3t1s3);
+		cr.save(c1t2s3); cr.save(c2t2s3); cr.save(c3t2s3);
 		cr.save(c1t3s3); cr.save(c2t3s3); cr.save(c3t3s3);
+
+		/* Anhade las temporadas a las series  */
+		s1.addTemporada(t1s1); s1.addTemporada(t2s1); s1.addTemporada(t3s1);
+		s2.addTemporada(t1s2); s2.addTemporada(t2s2); s2.addTemporada(t3s2);
+		s3.addTemporada(t1s3); s3.addTemporada(t2s3); s3.addTemporada(t3s3);
+
+		/* Anhade los capítulos a las temporadas */
+		t1s1.addCapitulo(c1t1s1); t1s1.addCapitulo(c2t1s1); t1s1.addCapitulo(c3t1s1);
+		t2s1.addCapitulo(c1t2s1); t2s1.addCapitulo(c2t2s1); t2s1.addCapitulo(c3t2s1);
+		t3s1.addCapitulo(c1t3s1); t3s1.addCapitulo(c2t3s1); t3s1.addCapitulo(c3t3s1);
+		
+		t1s2.addCapitulo(c1t1s2); t1s2.addCapitulo(c2t1s2); t1s2.addCapitulo(c3t1s2);
+		t2s2.addCapitulo(c1t2s2); t2s2.addCapitulo(c2t2s2); t2s2.addCapitulo(c3t2s2);
+		t3s2.addCapitulo(c1t3s2); t3s2.addCapitulo(c2t3s2); t3s2.addCapitulo(c3t3s2);
+
+		t1s3.addCapitulo(c1t1s3); t1s3.addCapitulo(c2t1s3); t1s3.addCapitulo(c3t1s3);
+		t2s3.addCapitulo(c1t2s3); t2s3.addCapitulo(c2t2s3); t2s3.addCapitulo(c3t2s3);
+		t3s3.addCapitulo(c1t3s3); t3s3.addCapitulo(c2t3s3); t3s3.addCapitulo(c3t3s3);
 	}
 
 /*	

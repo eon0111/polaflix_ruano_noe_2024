@@ -45,12 +45,23 @@ public class Capitulo {
         this.indice = indice;
     }
 
-	@Override
+    /**
+     * Retorna un booleano en función de si el capítulo es el último de la
+     * temporada o no.
+     * @return true si la temporada a la que pertenece el capítulo es la última
+     * de la serie y si el capítulo es el último de la temporada a la que este
+     * pertenece, o false en caso contrario
+     */
+    public boolean isUltimoCapituloSerie() {
+        return ((temporada.getIndice() == (temporada.getSerie().getNumTemporadas()) &&
+                indice == temporada.getNumCapitulos()) ? true : false);
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + indice;
-        result = prime * result + ((temporada == null) ? 0 : temporada.hashCode());
+        result = prime * result + (int) (id ^ (id >>> 32));
         return result;
     }
 
@@ -63,12 +74,7 @@ public class Capitulo {
         if (getClass() != obj.getClass())
             return false;
         Capitulo other = (Capitulo) obj;
-        if (indice != other.indice)
-            return false;
-        if (temporada == null) {
-            if (other.temporada != null)
-                return false;
-        } else if (!temporada.equals(other.temporada))
+        if (id != other.id)
             return false;
         return true;
     }
