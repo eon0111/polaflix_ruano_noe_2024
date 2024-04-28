@@ -3,8 +3,10 @@ package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.dominio;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.Stack;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -29,11 +31,11 @@ public class Usuario {
 	private Set<Long> capitulosVistos;
 
 	@ManyToMany
-	private Set<Serie> seriesTerminadas;
+	private Map<Long, Serie> seriesTerminadas;
 	@ManyToMany
-	private Set<Serie> seriesPendientes;
+	private Map<Long, Serie> seriesPendientes;
 	@ManyToMany
-	private Set<Serie> seriesEmpezadas;
+	private Map<Long, Serie> seriesEmpezadas;
 	
 	/* Costes de las visualizaciones en funcion del tipo de serie o la suscripcion */
 	private static final double CUOTA_FIJA = 20.0;
@@ -64,9 +66,9 @@ public class Usuario {
 		recibos.addLast(new Recibo());
 
 		this.capitulosVistos = new HashSet<Long>();
-		this.seriesEmpezadas = new HashSet<Serie>();
-		this.seriesPendientes = new HashSet<Serie>();
-		this.seriesTerminadas = new HashSet<Serie>();
+		this.seriesEmpezadas = new HashMap<Long, Serie>();
+		this.seriesPendientes = new HashMap<Long, Serie>();
+		this.seriesTerminadas = new HashMap<Long, Serie>();
 	}
 
 	/**
@@ -76,7 +78,15 @@ public class Usuario {
 	public void registraVisualizacion(Capitulo c) {
 		Serie sTmp = c.getTemporada().getSerie();
 
-		if (!seriesEmpezadas.contains(sTmp)) seriesEmpezadas.add(sTmp);
+		/* Se registra el comienzo de una serie si no se había visualizado aún
+		 * ningún capítulo de esta */
+		if (!seriesEmpezadas.containsKey(sTmp.getId()))
+			seriesEmpezadas.put(sTmp.getId(), sTmp);
+
+		/* Si es el último capítulo de la serie, esta se considera terminada */
+		if (c.getIndice() == c.getTemporada().getCapitulos().size() &&
+			c.getTemporada().getIndice() == c.getTemporada().getSerie().getNumTemporadas())
+			seriesEmpezadas.remove(c.getTemporada().getSerie().getId());
 
 		CategoriaSerie categoria = sTmp.getCategoria();
 		double importe = (cuotaFija) ? CUOTA_FIJA :
@@ -92,7 +102,9 @@ public class Usuario {
 
 		/* Se anhade la serie a la que pertenece el capítulo al listado de
 		 * series vistas si el capítulo es el último de la serie */
-		if (c.isUltimoCapituloSerie()) seriesTerminadas.add(c.getTemporada().getSerie());
+		if (c.isUltimoCapituloSerie())
+			seriesTerminadas.put(c.getTemporada().getSerie().getId(),
+								 c.getTemporada().getSerie());
 
 		// Se registra la visualizacion del capitulo
 		if(!capitulosVistos.contains(c.getId())) capitulosVistos.add(c.getId());
@@ -101,38 +113,37 @@ public class Usuario {
 	/**
 	 * Dada una serie, retorna la ultima temporada (la de mayor indice) que se
 	 * visualizo.
-	 * @param s la serie
+	 * @param id el ID de la serie
 	 * @return la ultima temporada vista en caso de ser una serie empezada, la
 	 * primera temporada en caso de ser una serie pendiente o terminada, o null
 	 * en otro caso
 	 */
-	public Temporada getUltimaTemporadaSerie(Serie s) {
-		if (seriesEmpezadas.contains(s)) {
+	public Temporada getUltimaTemporadaSerie(long id) {
+		if (seriesEmpezadas.containsKey(id)) {
 			int mayorIndiceTemporada = 0;
 
 			/* Busca entre todos los capitulos visualizados por el usuario, aquel
 			 * que pertenezca a la temporada con mayor indice */
-			for (Temporada t: s.getTemporadas()) {
-				for (Long id: capitulosVistos) {
-					if (t.getCapitulo(id) != null && t.getIndice() > mayorIndiceTemporada)
+			for (Temporada t: seriesEmpezadas.get(id).getTemporadas())
+				for (Long idTmp: capitulosVistos)
+					if (t.getCapitulo(idTmp) != null && t.getIndice() > mayorIndiceTemporada)
 						mayorIndiceTemporada = t.getIndice();
-				}
-			}
-		} else if (seriesPendientes.contains(s) || seriesTerminadas.contains(s)) {
-			/* Si no es una serie empezada se retorna la primera temporada */
-			return s.getTemporadas().getFirst();
+
+			return seriesEmpezadas.get(id).getTemporadas().get(mayorIndiceTemporada - 1);
 		}
 
-		return null;
+		return ((seriesPendientes.containsKey(id)) ? seriesPendientes.get(id).getTemporadas().getFirst() : 
+			   ((seriesTerminadas.containsKey(id)) ? seriesTerminadas.get(id).getTemporadas().getFirst() :
+			   null));
 	}
 
 	/**
-	 * Anhade una serie a las series pendientes del usuario
+	 * Anhade una serie a las series pendientes del usuario.
 	 * @param s la nueva serie pendiente
 	 */
 	public void addSeriePendiente(Serie s) {
-		if (!seriesPendientes.contains(s)) {
-			seriesPendientes.add(s);
+		if (!seriesPendientes.containsKey(s.getId())) {
+			seriesPendientes.put(s.getId(), s);
 		}
 	}
 
@@ -181,15 +192,15 @@ public class Usuario {
 		return capitulosVistos;
 	}
 
-	public Set<Serie> getSeriesTerminadas() {
+	public Map<Long, Serie> getSeriesTerminadas() {
 		return seriesTerminadas;
 	}
 
-	public Set<Serie> getSeriesPendientes() {
+	public Map<Long, Serie> getSeriesPendientes() {
 		return seriesPendientes;
 	}
 
-	public Set<Serie> getSeriesEmpezadas() {
+	public Map<Long, Serie> getSeriesEmpezadas() {
 		return seriesEmpezadas;
 	}
 

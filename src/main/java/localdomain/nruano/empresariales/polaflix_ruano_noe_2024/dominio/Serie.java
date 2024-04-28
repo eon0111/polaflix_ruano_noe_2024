@@ -117,6 +117,10 @@ public class Serie {
 
 	/****** SETTERS ******/
 
+	public void setId(long id) {
+		this.id = id;
+	}
+
 	public void setTitulo(String titulo) {
 		this.titulo = titulo;
 	}

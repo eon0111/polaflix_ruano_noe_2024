@@ -27,32 +27,42 @@ public class AppFeeder implements CommandLineRunner {
 	@Autowired
 	protected CapituloRepository cr;
 
+	/* -- Series -- */
+	private Serie s1 = new Serie("Mr. Robot", CategoriaSerie.GOLD, "Mr. Robot is a techno thriller that follows Elliot, a young programmer...");
+	private Serie s2 = new Serie("Young Sheldon", CategoriaSerie.SILVER, "For 9-year-old Sheldon Cooper, being a once-in-a-generation mind...");
+	private Serie s3 = new Serie("The Office", CategoriaSerie.ESTANDAR, "In this US adaptation of iconic British sitcom `The Office'...");
+
 	@Override
 	public void run(String... args) throws Exception {
 		feedUsuarios();
 		feedSeries();
-/*
-		System.out.println("<<<<<<<< Test SerieRepository >>>>>>>>>>>>");
+
+		System.out.println("[*] Application feeded successfully!");
+		System.out.println("\n==========================================");
+
+		System.out.println(">>>>> Test SerieRepository >>>>>>>>>>>>>>>\n");
 		testSerieRepository();
-		System.out.println("==========================================");
+		System.out.println("\n==========================================");
 
-		System.out.println("\n<<<<<<<< Test TemporadaRepository >>>>>>>>");
+		System.out.println(">>>>> Test TemporadaRepository >>>>>>>>>>>\n");
 		testTemporadaRepository();
-		System.out.println("==========================================");
+		System.out.println("\n==========================================");
 
-		System.out.println("\n<<<<<<<< Test CapituloRepository >>>>>>>>>");
+		System.out.println(">>>>> Test CapituloRepository >>>>>>>>>>>>\n");
 		testCapituloRepository();
-		System.out.println("==========================================");
+		System.out.println("\n==========================================");
 
-		System.out.println("\n<<<<<<<< Test UsuarioRepository >>>>>>>>>>");
+		System.out.println(">>>>> Test UsuarioRepository >>>>>>>>>>>>>\n");
 		testUsuarioRepository();
-		System.out.println("==========================================");
-*/
-		System.out.println("\n<<<<<<<< Test Usuario >>>>>>>>>>>>>>>>>>>>");
-		testUsuario();
-		System.out.println("==========================================");
-	
-		// System.out.println("Application feeded");
+		System.out.println("\n==========================================");
+
+		System.out.println(">>>>> Test Usuario (SIN cuota fija) >>>>>>\n");
+		testUsuarioNormal();
+		System.out.println("\n==========================================");
+
+		System.out.println(">>>>> Test Usuario (CON cuota fija) >>>>>>\n");
+		testUsuarioCuotaFija();
+		System.out.println("\n==========================================");
 	}
 
 	/****** TEST SerieRepository **********************************************/
@@ -174,6 +184,11 @@ public class AppFeeder implements CommandLineRunner {
 	}
 
 	/****** TEST Usuario ******************************************************/
+	
+	/**
+	 * Muestra los recibos de un usuario.
+	 * @param u El usuario
+	 */
 	private void muestraRecibosUsuario(Usuario u) {
 		System.out.println("\n[*] Recibos del usuario \"" + u.getNombre() + "\":");
 
@@ -201,6 +216,10 @@ public class AppFeeder implements CommandLineRunner {
 		}
 	}
 
+	/**
+	 * Muestra los capítulos visualizados por un usuario.
+	 * @param u el usuario
+	 */
 	private void muestraVisualizacionesUsuario(Usuario u) {
 		System.out.println("\n[*] Visualizaciones del usuario \"" + u.getNombre() + "\":");
 		Capitulo cTmp;
@@ -212,25 +231,31 @@ public class AppFeeder implements CommandLineRunner {
 		}
 	}
 
+	/**
+	 * Muestra las series empezadas, terminadas y pendientes de un usuario.
+	 * @param u el usuario
+	 */
 	private void muestraSeriesUsuario(Usuario u) {
 		System.out.println("\n[*] Series del usuario \"" + u.getNombre() + "\":");
 
 		System.out.println("  >> Series terminadas:");
-		for (Serie s: u.getSeriesTerminadas())
+		for (Serie s: u.getSeriesTerminadas().values())
 			System.out.println("    - \"" + s.getTitulo() + "\"");
 
 		System.out.println("  >> Series pendientes:");
-		for (Serie s: u.getSeriesPendientes())
+		for (Serie s: u.getSeriesPendientes().values())
 			System.out.println("    - \"" + s.getTitulo() + "\"");
 
 		System.out.println("  >> Series empezadas:");
-		for (Serie s: u.getSeriesEmpezadas())
+		for (Serie s: u.getSeriesEmpezadas().values())
 			System.out.println("    - \"" + s.getTitulo() + "\"");
 	}
 
-	private void testUsuario() {
-		System.out.println("Temporadas de Mr. Robot: " + sr.findByTitulo("Mr. Robot").getNumTemporadas());
-
+	/**
+	 * Comprueba el correcto funcionamiento de todas las funcionalidades
+	 * implementadas en la clase Usuario.
+	 */
+	private void testUsuarioNormal() {
 		Usuario u = ur.findByNombre("pacoloco");
 		System.out.println("Usuario: \"" + u.getNombre() + "\"");
 
@@ -276,8 +301,68 @@ public class AppFeeder implements CommandLineRunner {
 		System.out.println("\n==========================================");
 
 		/* Anhade una serie pendiente */
-		u.addSeriePendiente(sr.findByTitulo("Peaky Blinders"));
+		System.out.println("\n[*] Anhadiendo serie pendiente: \"The Office\"");
+		u.addSeriePendiente(sr.findByTitulo("The Office"));
+		muestraSeriesUsuario(u);
+
+		System.out.println("\n==========================================");
+
+		/* Comprueba la última temporada vista de cada serie */
+		System.out.println("\n[*] Últimas temporadas vistas:");
+		Temporada tTmp = u.getUltimaTemporadaSerie(s1.getId());
+		System.out.println("  >> \"Mr. Robot (empezada)\": " + ((tTmp != null) ? tTmp.getIndice() : "NONE"));
+		tTmp = u.getUltimaTemporadaSerie(s2.getId());
+		System.out.println("  >> \"Young Sheldon (terminada)\": " + ((tTmp != null) ? tTmp.getIndice() : "NONE"));
+		tTmp = u.getUltimaTemporadaSerie(s3.getId());
+		System.out.println("  >> \"The Office (serie pendiente)\": " + ((tTmp != null) ? tTmp.getIndice() : "NONE"));
 	}
+
+	/**
+	 * Comprueba el correcto funcionamiento del sistema de facturación para los
+	 * usuarios suscritos a la cuota fija.
+	 */
+	private void testUsuarioCuotaFija() {
+		Usuario u = ur.findByNombre("lolaloca");
+		System.out.println("Usuario: \"" + u.getNombre() + "\"");
+
+		/* Nueva visualización de un capítulo de una serie GOLD (con cuota fija) */
+		System.out.println("[*] Registrando visualizaciones: Mr. Robot - (01x01, 01x02, 01x03)");
+		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 1));
+		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 2));
+		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 3));
+
+		/* Comprueba las visualizaciones y los recibos del usuario */
+		muestraVisualizacionesUsuario(u);
+		muestraRecibosUsuario(u);
+
+		System.out.println("\n==========================================");
+
+		/* Emite un recibo */
+		System.out.println("\n[*] Emitiendo último recibo");
+		u.addRecibo();
+
+		/* Comprueba los recibos del usuario para ver que la fecha de emisión se
+		 * registra correctamente */
+		muestraRecibosUsuario(u);
+
+		System.out.println("\n==========================================");
+
+		/* Registra visualizaciones de capítulos de una serie SILVER y genera
+		 * un nuevo recibo */
+		System.out.println("\n[*] Registrando visualizaciones: Young Sheldon - (01x01, 02x01, 03x03)");
+		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Young Sheldon", 1, 1));
+		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Young Sheldon", 2, 1));
+		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Young Sheldon", 3, 3));
+
+		System.out.println("\n[*] Emitiendo último recibo");
+		u.addRecibo();
+
+		/* Comprueba las visualizaciones y los recibos del usuario, así como sus
+		 * series con objeto de comprobar si se ha registrado la serie como
+		 * terminada, al haber sido visualizado su último capítulo */
+		muestraRecibosUsuario(u);
+	}
+
 
 	/****** FEED usuarios *****************************************************/
 	private void feedUsuarios() {
@@ -289,11 +374,6 @@ public class AppFeeder implements CommandLineRunner {
 
 	/****** FEED series *******************************************************/
 	private void feedSeries() {
-		/* -- Series -- */
-		Serie s1 = new Serie("Mr. Robot", CategoriaSerie.GOLD, "Mr. Robot is a techno thriller that follows Elliot, a young programmer...");
-		Serie s2 = new Serie("Young Sheldon", CategoriaSerie.SILVER, "For 9-year-old Sheldon Cooper, being a once-in-a-generation mind...");
-		Serie s3 = new Serie("The Office", CategoriaSerie.ESTANDAR, "In this US adaptation of iconic British sitcom `The Office'...");
-
 		/* Registro de las series en la BD */
 		sr.save(s1); sr.save(s2); sr.save(s3);
 
@@ -385,44 +465,4 @@ public class AppFeeder implements CommandLineRunner {
 		t2s3.addCapitulo(c1t2s3); t2s3.addCapitulo(c2t2s3); t2s3.addCapitulo(c3t2s3);
 		t3s3.addCapitulo(c1t3s3); t3s3.addCapitulo(c2t3s3); t3s3.addCapitulo(c3t3s3);
 	}
-
-/*	
-	private void testViajeRepository() {
-		
-		SimpleDateFormat dateParser = new SimpleDateFormat("dd-MM-yyyy");
-		Date sample = null;
-		try {
-			sample = dateParser.parse("01-01-2020");
-		} catch (ParseException e) {
-			System.out.println("Crujo parseando fecha");
-			e.printStackTrace();
-		}
-		
-		// Set<Viaje> viajes = vr.findByOrigenCiudadAndDestinoCiudad("Santander","Cadiz");
-		Set<Viaje> viajes = vr.findByOrigenAndDestino("Santander","Cadiz");
-		
-		System.out.println("Viajes recuperados = " + viajes.size());
-	
-		for(Viaje v : viajes) {
-			System.out.println("Viaje in " + v.getFecha());
-		}
-		
-		viajes = vr.findByOrigen_CiudadAndFechaBeforeOrderByPrecio("Santander", sample);
-
-		System.out.println("================================");
-		
-		System.out.println("Viajes recuperados = " + viajes.size());
-		
-		
-//		Usuario paco = ur.findByEmail("paco@carSharing.es"); 
-//		
-//		System.out.println("Paco = " + paco.getNombre() + ":" + paco.getEmail());
-//		
-//		Set<Usuario> usuarios = ur.findByFechaAltaAfter(sample);
-//		for(Usuario u : usuarios) {
-//			System.out.println("Usuario " + u.getNombre() + ":" + u.getEmail());
-//		}
-		
-	}*/
-
 }
