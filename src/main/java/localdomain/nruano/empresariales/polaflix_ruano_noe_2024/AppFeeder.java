@@ -43,7 +43,7 @@ public class AppFeeder implements CommandLineRunner {
 		System.out.println(">>>>> Test SerieRepository >>>>>>>>>>>>>>>\n");
 		testSerieRepository();
 		System.out.println("\n==========================================");
-
+/*
 		System.out.println(">>>>> Test TemporadaRepository >>>>>>>>>>>\n");
 		testTemporadaRepository();
 		System.out.println("\n==========================================");
@@ -63,15 +63,20 @@ public class AppFeeder implements CommandLineRunner {
 		System.out.println(">>>>> Test Usuario (CON cuota fija) >>>>>>\n");
 		testUsuarioCuotaFija();
 		System.out.println("\n==========================================");
+*/
 	}
 
 	/****** TEST SerieRepository **********************************************/
 
 	private void testSerieRepository() {
+		/*
 		testFindByTitulo("Mr. Robot", true);
 		testFindByTitulo("Young Sheldon", true);
 		testFindByTitulo("The Office", true);
 		testFindByTitulo("invent", false);
+		*/
+
+		testAddRemoveSerie();
 	}
 
 	private void testFindByTitulo(String titulo, boolean esperado) {
@@ -82,6 +87,33 @@ public class AppFeeder implements CommandLineRunner {
 			System.out.println(((esperado) ? "-- PASS --" : "-- FAIL --"));
 		else
 			System.out.println(((!esperado) ? "-- PASS --" : "-- FAIL --"));
+	}
+
+	void testAddRemoveSerie() {
+		System.out.println("[*] Anhadiendo serie \"Test\"");
+
+		/* Registra una nueva serie en el repositorio */
+		Serie serieTest = new Serie("Test", CategoriaSerie.ESTANDAR, "empty");
+		sr.save(serieTest);
+		Temporada temporadaTest = new Temporada(1, serieTest);
+		tr.save(temporadaTest);
+		Capitulo capituloTest = new Capitulo("CapTest", "empty", "empty", temporadaTest, 1);
+		cr.save(capituloTest);
+
+		serieTest.addTemporada(temporadaTest);
+		temporadaTest.addCapitulo(capituloTest);
+
+		/* Comprueba que la serie, sus temporadas y los capítulos de estas se han
+		 * registrado correctamente */
+		System.out.println("[*] Serie registrada: \"" + sr.findByTitulo("Test").getTitulo() + "\"");
+		for (Temporada t: sr.findByTitulo("Test").getTemporadas()) {
+			System.out.println("  >> Temporada " + t.getIndice() + ":");
+			for (Capitulo c: t.getCapitulos().values()) {
+				System.out.println("    -- Capitulo: " + c.getIndice() + "\": " + c.getTitulo() + "\"");
+			}
+		}
+
+		// TODO: eliminar la serie y ver cómo quedan los repositorios de series, temporadas y capítulos
 	}
 
 	/****** TEST TemporadaRepository ******************************************/
