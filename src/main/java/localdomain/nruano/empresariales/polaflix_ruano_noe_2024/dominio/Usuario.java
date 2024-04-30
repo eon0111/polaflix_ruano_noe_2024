@@ -25,7 +25,7 @@ public class Usuario {
 	private boolean cuotaFija;
 	private String iban;
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)	// FIXME: puede que el cascade sea REMOVE
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Recibo> recibos;
 
 	private Set<Long> capitulosVistos;

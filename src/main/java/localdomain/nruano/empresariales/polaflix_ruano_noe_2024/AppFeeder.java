@@ -43,7 +43,7 @@ public class AppFeeder implements CommandLineRunner {
 		System.out.println(">>>>> Test SerieRepository >>>>>>>>>>>>>>>\n");
 		testSerieRepository();
 		System.out.println("\n==========================================");
-/*
+
 		System.out.println(">>>>> Test TemporadaRepository >>>>>>>>>>>\n");
 		testTemporadaRepository();
 		System.out.println("\n==========================================");
@@ -63,18 +63,15 @@ public class AppFeeder implements CommandLineRunner {
 		System.out.println(">>>>> Test Usuario (CON cuota fija) >>>>>>\n");
 		testUsuarioCuotaFija();
 		System.out.println("\n==========================================");
-*/
 	}
 
 	/****** TEST SerieRepository **********************************************/
 
 	private void testSerieRepository() {
-		/*
 		testFindByTitulo("Mr. Robot", true);
 		testFindByTitulo("Young Sheldon", true);
 		testFindByTitulo("The Office", true);
 		testFindByTitulo("invent", false);
-		*/
 
 		testAddRemoveSerie();
 	}
@@ -89,6 +86,11 @@ public class AppFeeder implements CommandLineRunner {
 			System.out.println(((!esperado) ? "-- PASS --" : "-- FAIL --"));
 	}
 
+	/**
+	 * Anhade una serie al repositorio, junto con una temporada y un capítulo, y
+	 * comprueba que la eliminación de la serie provoca la eliminación en cascada
+	 * de su temporada y el capítulo.
+	 */
 	void testAddRemoveSerie() {
 		System.out.println("[*] Anhadiendo serie \"Test\"");
 
@@ -113,7 +115,20 @@ public class AppFeeder implements CommandLineRunner {
 			}
 		}
 
-		// TODO: eliminar la serie y ver cómo quedan los repositorios de series, temporadas y capítulos
+		/* Elimina la serie y comprueba si sus temporadas y capítulos han sido
+		 * eliminados en cascada */
+		sr.delete(serieTest);
+		System.out.println("[*] Serie \"Test\" eliminada");
+
+		System.out.println("[*] Serie \"Test\" " +
+				((sr.findByTitulo("Test") == null) ? "no" : "") +
+				" encontrada");
+		System.out.println("[*] Temporada \"Test\" " +
+				((tr.findByTituloSerieAndIndice("Test", 1) == null) ? "no" : "") +
+				" encontrada");
+		System.out.println("[*] Capítulo \"Test\" " +
+				((cr.findByTituloSerieAndIndTempAndIndCap("Test", 1, 1) == null) ? "no" : "") +
+				" encontrado");
 	}
 
 	/****** TEST TemporadaRepository ******************************************/
@@ -203,6 +218,8 @@ public class AppFeeder implements CommandLineRunner {
 		testFindByNombre("pacoloco", true);
 		testFindByNombre("lolaloca", true);
 		testFindByNombre("invent", false);
+
+		testAddRemoveUsuario();
 	}
 
 	private void testFindByNombre(String nombre, boolean esperado) {
@@ -213,6 +230,49 @@ public class AppFeeder implements CommandLineRunner {
 			System.out.println(((esperado) ? "-- PASS --" : "-- FAIL --"));
 		else
 			System.out.println(((!esperado) ? "-- PASS --" : "-- FAIL --"));
+	}
+
+	private void testAddRemoveUsuario() {
+		/* Anhade un nuevo usuario de test al repositorio */
+		System.out.println("[*] Anhadiendo nuevo usuario \"pepega\"");
+		Usuario u = new Usuario("pepega", "pepega1234", false, "ES1295137562464862179358");
+		ur.save(u);
+
+		/* Anhade una nueva serie de test al repositorio */
+		System.out.println("[*] Anhadiendo nueva serie \"Test\"");
+		Serie serieTest = new Serie("Test", CategoriaSerie.ESTANDAR, "empty");
+		sr.save(serieTest);
+		Temporada temporadaTest = new Temporada(1, serieTest);
+		tr.save(temporadaTest);
+		Capitulo capituloTest = new Capitulo("CapTest", "empty", "empty", temporadaTest, 1);
+		cr.save(capituloTest);
+
+		serieTest.addTemporada(temporadaTest);
+		temporadaTest.addCapitulo(capituloTest);
+
+		/* Registra la visualización del capítulo de la serie de test (la serie
+		 * debería quedar registrada en la lista de series terminadas del usuario,
+		 * al haber sido visualizado el último capítulo de la serie) */
+		u.registraVisualizacion(capituloTest);
+
+		/* Comprueba las visualizaciones y las series del usuario */
+		muestraVisualizacionesUsuario(u);
+		muestraSeriesUsuario(u);
+
+		/* Elimina al usuario para comprobar que su eliminación no altera el
+		 * estado del resto de repositorios */
+		ur.delete(u);
+		System.out.println("[*] Usuario \"pepega\" eliminado");
+
+		System.out.println("[*] Serie \"Test\" " +
+				((sr.findByTitulo("Test") == null) ? "no" : "") +
+				" encontrada");
+		System.out.println("[*] Temporada \"Test\" " +
+				((tr.findByTituloSerieAndIndice("Test", 1) == null) ? "no" : "") +
+				" encontrada");
+		System.out.println("[*] Capítulo \"Test\" " +
+				((cr.findByTituloSerieAndIndTempAndIndCap("Test", 1, 1) == null) ? "no" : "") +
+				" encontrado");
 	}
 
 	/****** TEST Usuario ******************************************************/
@@ -281,6 +341,8 @@ public class AppFeeder implements CommandLineRunner {
 		System.out.println("  >> Series empezadas:");
 		for (Serie s: u.getSeriesEmpezadas().values())
 			System.out.println("    - \"" + s.getTitulo() + "\"");
+
+		System.out.println("");
 	}
 
 	/**
