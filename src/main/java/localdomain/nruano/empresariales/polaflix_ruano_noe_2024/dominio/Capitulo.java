@@ -10,7 +10,7 @@ import jakarta.persistence.ManyToOne;
 public class Capitulo {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     private int indice;
@@ -25,7 +25,7 @@ public class Capitulo {
     /**
 	 * Constructor vacio.
 	 */
-    protected Capitulo() { }
+    public Capitulo() { }
     
     /**
      * Construye un capitulo.
@@ -125,6 +125,10 @@ public class Capitulo {
     
     public void setTemporada(Temporada temporada) {
         this.temporada = temporada;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
     
 }

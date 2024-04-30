@@ -16,8 +16,9 @@ import jakarta.persistence.OneToMany;
 public class Temporada {
     
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
+
     private int indice;
 
 	@ManyToOne
@@ -29,7 +30,7 @@ public class Temporada {
 	/**
 	 * Constructor vacio.
 	 */
-	protected Temporada() { }
+	public Temporada() { }
 
     /**
      * Construye una temporada.
@@ -42,25 +43,26 @@ public class Temporada {
 		this.capitulos = new HashMap<Long, Capitulo>();
     }
 
-    @Override
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + indice;
-		result = prime * result + ((serie == null) ? 0 : serie.hashCode());
+		result = prime * result + (int) (id ^ (id >>> 32));
 		return result;
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		else if (!(o instanceof Temporada) || o == null)
+		if (obj == null)
 			return false;
-		else if (((Temporada)o).getSerie().equals(this.serie) &&
-				((Temporada) o).getIndice() == this.indice)
-			return true;
-		else return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Temporada other = (Temporada) obj;
+		if (id != other.id)
+			return false;
+		return true;
 	}
 
 	/****** GETTERS ******/
@@ -77,15 +79,23 @@ public class Temporada {
 		return capitulos;
 	}
 
-	public Capitulo getCapitulo(long id) {
-		return capitulos.get(id);
+	public Capitulo getCapitulo(long indice) {
+		return capitulos.get(indice);
 	}
 
 	public int getNumCapitulos() {
 		return capitulos.size();
 	}
 
+	public long getId() {
+		return id;
+	}
+
     /****** SETTERS ******/
+
+	public void setId(long id) {
+		this.id = id;
+	}
 
     public void setIndice(int indice) {
         this.indice = indice;
@@ -100,7 +110,7 @@ public class Temporada {
 	}
 
 	public void addCapitulo(Capitulo c) {
-		this.capitulos.put(c.getId(), c);
+		this.capitulos.put((long)c.getIndice(), c);
 	}
 
 }

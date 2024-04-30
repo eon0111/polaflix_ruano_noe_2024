@@ -1,7 +1,6 @@
 package localdomain.nruano.empresariales.polaflix_ruano_noe_2024;
 
 import java.util.ArrayList;
-import java.util.Stack;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -11,7 +10,6 @@ import jakarta.transaction.Transactional;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.dominio.*;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.repositorios.*;
 
-@Transactional
 @Component
 public class AppFeeder implements CommandLineRunner {
 	
@@ -20,36 +18,30 @@ public class AppFeeder implements CommandLineRunner {
 
 	@Autowired
 	protected SerieRepository sr;
-	
-	@Autowired
-	protected TemporadaRepository tr;
-	
-	@Autowired
-	protected CapituloRepository cr;
 
+	@Autowired
+	protected ReciboRepository rr;
+	
 	/* -- Series -- */
-	private Serie s1 = new Serie("Mr. Robot", CategoriaSerie.GOLD, "Mr. Robot is a techno thriller that follows Elliot, a young programmer...");
-	private Serie s2 = new Serie("Young Sheldon", CategoriaSerie.SILVER, "For 9-year-old Sheldon Cooper, being a once-in-a-generation mind...");
-	private Serie s3 = new Serie("The Office", CategoriaSerie.ESTANDAR, "In this US adaptation of iconic British sitcom `The Office'...");
+	private ArrayList<Serie> series;
+	private Serie s1 = new Serie("Mr. Robot", CategoriaSerie.GOLD, "Mr. Robot is a techno thriller that follows Elliot, a young programmer...");;
+	private Serie s2 = new Serie("Young Sheldon", CategoriaSerie.SILVER, "For 9-year-old Sheldon Cooper, being a once-in-a-generation mind...");;
+	private Serie s3 = new Serie("The Office", CategoriaSerie.ESTANDAR, "In this US adaptation of iconic British sitcom `The Office'...");;
 
 	@Override
+	@Transactional
 	public void run(String... args) throws Exception {
 		feedUsuarios();
 		feedSeries();
+
+		series = new ArrayList<Serie>();
+		series.add(s1); series.add(s2); series.add(s3);
 
 		System.out.println("[*] Application feeded successfully!");
 		System.out.println("\n==========================================");
 
 		System.out.println(">>>>> Test SerieRepository >>>>>>>>>>>>>>>\n");
 		testSerieRepository();
-		System.out.println("\n==========================================");
-
-		System.out.println(">>>>> Test TemporadaRepository >>>>>>>>>>>\n");
-		testTemporadaRepository();
-		System.out.println("\n==========================================");
-
-		System.out.println(">>>>> Test CapituloRepository >>>>>>>>>>>>\n");
-		testCapituloRepository();
 		System.out.println("\n==========================================");
 
 		System.out.println(">>>>> Test UsuarioRepository >>>>>>>>>>>>>\n");
@@ -63,6 +55,45 @@ public class AppFeeder implements CommandLineRunner {
 		System.out.println(">>>>> Test Usuario (CON cuota fija) >>>>>>\n");
 		testUsuarioCuotaFija();
 		System.out.println("\n==========================================");
+
+		System.out.println(">>>>> Test ReciboRepository >>>>>>\n");
+		testReciboRepository();
+		System.out.println("\n==========================================");
+	}
+
+	/**
+	 * Busca en todas las series registradas en el repositorio, un capítulo cuyo
+	 * ID coincida con el indicado.
+	 * @param id el ID del capítulo
+	 * @return un capítulo cuyo ID coincide con el indicado, o null si no se
+	 * encuentra ningún capítulo con ese ID
+	 */
+	private Capitulo getCapituloById(long id) {
+		for (Serie s: series)
+			for (Temporada t: s.getTemporadas())
+				for (Capitulo c: t.getCapitulos().values())
+					if (c.getId() == id) return c;
+
+		return null;
+	}
+
+	/**
+	 * Realiza una búsqueda lineal del capítulo en base al nombre de la serie y
+	 * el índice de la temporada a las que pertenece.
+	 * @param titulo el título de la serie
+	 * @param indTemp el índice de la temporada
+	 * @param indCap el índice del capítulo
+	 * @return el capítulo buscado o null en caso de no encontrarse un capítulo
+	 * con esas características
+	 */
+	private Capitulo findCapByTituloSerieAndIndTempAndIndCap(String titulo, int indTemp, int indCap) {
+		for (Serie s: series)
+			if (s.getTitulo().equals(titulo))
+				for (Temporada t: s.getTemporadas())
+					if (t.getIndice() == indTemp)
+						for (Capitulo c: t.getCapitulos().values())
+							if (c.getIndice() == indCap) return c;
+		return null;
 	}
 
 	/****** TEST SerieRepository **********************************************/
@@ -92,15 +123,13 @@ public class AppFeeder implements CommandLineRunner {
 	 * de su temporada y el capítulo.
 	 */
 	void testAddRemoveSerie() {
-		System.out.println("[*] Anhadiendo serie \"Test\"");
+		System.out.println("\n[*] Anhadiendo serie \"Test\"");
 
 		/* Registra una nueva serie en el repositorio */
 		Serie serieTest = new Serie("Test", CategoriaSerie.ESTANDAR, "empty");
 		sr.save(serieTest);
 		Temporada temporadaTest = new Temporada(1, serieTest);
-		tr.save(temporadaTest);
 		Capitulo capituloTest = new Capitulo("CapTest", "empty", "empty", temporadaTest, 1);
-		cr.save(capituloTest);
 
 		serieTest.addTemporada(temporadaTest);
 		temporadaTest.addCapitulo(capituloTest);
@@ -123,96 +152,9 @@ public class AppFeeder implements CommandLineRunner {
 		System.out.println("[*] Serie \"Test\" " +
 				((sr.findByTitulo("Test") == null) ? "no" : "") +
 				" encontrada");
-		System.out.println("[*] Temporada \"Test\" " +
-				((tr.findByTituloSerieAndIndice("Test", 1) == null) ? "no" : "") +
-				" encontrada");
-		System.out.println("[*] Capítulo \"Test\" " +
-				((cr.findByTituloSerieAndIndTempAndIndCap("Test", 1, 1) == null) ? "no" : "") +
-				" encontrado");
 	}
 
-	/****** TEST TemporadaRepository ******************************************/
-
-	private void testTemporadaRepository() {
-		/* findByIdSerieAndIndice */
-		testFindByIdSerieAndIndice(1, 1, true);
-		testFindByIdSerieAndIndice(1, 4, false);	// Índice por encima del rango [0,3]
-		testFindByIdSerieAndIndice(1, -1, false);	// Índice por debajo del rango [0,3]
-		testFindByIdSerieAndIndice(-1, 1, false);	// ID no válido
-		testFindByIdSerieAndIndice(-1, 10, false);	// ID e índice no válidos
-
-		/* findByIdSerieAndIndiceTemporada */
-		testFindByTituloSerieAndIndice("Mr. Robot", 1, true);
-		testFindByTituloSerieAndIndice("Mr. Robot", 4, false);
-		testFindByTituloSerieAndIndice("Mr. Robot", -1, false);
-		testFindByTituloSerieAndIndice("Invent", 1, false);
-		testFindByTituloSerieAndIndice("Invent", -1, false);
-	}
-
-	private void testFindByIdSerieAndIndice(long idSerie, int indice, boolean esperado) {
-		System.out.println("[*] Buscando temporada -> idSerie: " + idSerie + "\tindice: " + indice);
-		Temporada t = tr.findByIdSerieAndIndice(idSerie, indice);
-
-		if (t != null && t.getSerie().getId() == idSerie && t.getIndice() == indice)
-			System.out.println(((esperado) ? "-- PASS --" : "-- FAIL --"));
-		else
-			System.out.println(((!esperado) ? "-- PASS --" : "-- FAIL --"));
-	}
-
-	private void testFindByTituloSerieAndIndice(String titulo, int indice, boolean esperado) {
-		System.out.println("[*] Buscando temporada -> serie: \"" + titulo + "\"\tindice: " + indice);
-		Temporada t = tr.findByTituloSerieAndIndice(titulo, indice);
-
-		if (t != null && t.getSerie().getTitulo().equals(titulo) && t.getIndice() == indice)
-			System.out.println(((esperado) ? "-- PASS --" : "-- FAIL --"));
-		else
-			System.out.println(((!esperado) ? "-- PASS --" : "-- FAIL --"));
-	}
-
-	/****** TEST CapituloRepository *******************************************/
-
-	private void testCapituloRepository() {
-		/* finByTituloSerieAndIndTemp */
-		testFindByTituloSerieAndIndTemp("Mr. Robot", 1, true);
-		testFindByTituloSerieAndIndTemp("Mr. Robot", 4, false);
-		testFindByTituloSerieAndIndTemp("Mr. Robot", -1, false);
-		testFindByTituloSerieAndIndTemp("Invent", 1, false);
-		testFindByTituloSerieAndIndTemp("Invent", -1, false);
-
-		/* finByTituloSerieAndIndTempAndIndCap */
-		testFindByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 1, true);
-		testFindByTituloSerieAndIndTempAndIndCap("Mr. Robot", -1, 1, false);
-		testFindByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, -1, false);
-		testFindByTituloSerieAndIndTempAndIndCap("Invent", 1, 1, false);
-	}
-
-	private void testFindByTituloSerieAndIndTemp(String titulo, int indice, boolean esperado) {
-		System.out.println("[*] Buscando capitulos -> serie: \"" + titulo + "\"\tindice: " + indice);
-		ArrayList<Capitulo> cs = cr.findByTituloSerieAndIndTemp(titulo, indice);
-
-		if (cs.isEmpty())
-			System.out.println(((!esperado) ? "-- PASS --" : "-- FAIL --"));
-		else if (esperado)
-			for(Capitulo c: cs)
-				System.out.println("-- Titulo: \"" + c.getTitulo() + "\"");
-		else
-			System.out.println("-- FAIL --");
-	}
-
-	private void testFindByTituloSerieAndIndTempAndIndCap(String titulo, int indTemp,
-			int indCap, boolean esperado) {
-		System.out.println("[*] Buscando capitulos -> serie: \"" + titulo +
-				"\"\ttemporada: " + indTemp + "\tcapitulo: " + indCap);
-		Capitulo c = cr.findByTituloSerieAndIndTempAndIndCap(titulo, indTemp, indCap);
-
-		if (c != null && c.getTemporada().getIndice() == indTemp &&
-				c.getTemporada().getSerie().getTitulo().equals(titulo))
-			System.out.println(((esperado) ? "-- PASS --" : "-- FAIL --"));
-		else
-			System.out.println(((!esperado) ? "-- PASS --" : "-- FAIL --"));
-	}
-
-	/****** TEST UsuarioRepository *******************************************/
+	/****** TEST UsuarioRepository ********************************************/
 
 	private void testUsuarioRepository() {
 		testFindByNombre("pacoloco", true);
@@ -234,21 +176,20 @@ public class AppFeeder implements CommandLineRunner {
 
 	private void testAddRemoveUsuario() {
 		/* Anhade un nuevo usuario de test al repositorio */
-		System.out.println("[*] Anhadiendo nuevo usuario \"pepega\"");
+		System.out.println("\n[*] Anhadiendo nuevo usuario \"pepega\"");
 		Usuario u = new Usuario("pepega", "pepega1234", false, "ES1295137562464862179358");
 		ur.save(u);
 
 		/* Anhade una nueva serie de test al repositorio */
 		System.out.println("[*] Anhadiendo nueva serie \"Test\"");
 		Serie serieTest = new Serie("Test", CategoriaSerie.ESTANDAR, "empty");
-		sr.save(serieTest);
 		Temporada temporadaTest = new Temporada(1, serieTest);
-		tr.save(temporadaTest);
 		Capitulo capituloTest = new Capitulo("CapTest", "empty", "empty", temporadaTest, 1);
-		cr.save(capituloTest);
 
-		serieTest.addTemporada(temporadaTest);
 		temporadaTest.addCapitulo(capituloTest);
+		serieTest.addTemporada(temporadaTest);
+		sr.save(serieTest);
+		series.add(serieTest);
 
 		/* Registra la visualización del capítulo de la serie de test (la serie
 		 * debería quedar registrada en la lista de series terminadas del usuario,
@@ -260,19 +201,16 @@ public class AppFeeder implements CommandLineRunner {
 		muestraSeriesUsuario(u);
 
 		/* Elimina al usuario para comprobar que su eliminación no altera el
-		 * estado del resto de repositorios */
+		 * estado del repositorio de series */
+		System.out.println("[*] Eliminando usuario \"pepega\"");
 		ur.delete(u);
-		System.out.println("[*] Usuario \"pepega\" eliminado");
 
+		System.out.println("[*] Usuario \"pepega\" " +
+				((ur.findByNombre("pepega") != null) ? "no" : "") +
+				" eliminado");
 		System.out.println("[*] Serie \"Test\" " +
 				((sr.findByTitulo("Test") == null) ? "no" : "") +
 				" encontrada");
-		System.out.println("[*] Temporada \"Test\" " +
-				((tr.findByTituloSerieAndIndice("Test", 1) == null) ? "no" : "") +
-				" encontrada");
-		System.out.println("[*] Capítulo \"Test\" " +
-				((cr.findByTituloSerieAndIndTempAndIndCap("Test", 1, 1) == null) ? "no" : "") +
-				" encontrado");
 	}
 
 	/****** TEST Usuario ******************************************************/
@@ -295,14 +233,14 @@ public class AppFeeder implements CommandLineRunner {
 					" |#| Importe: " + r.getImporte() + " EUR");
 
 			for (Cargo c: r.getCargos()) {
-				cTmp = cr.getReferenceById(c.getIdCapitulo());
+				cTmp = getCapituloById(c.getIdCapitulo());
 				sTmp = cTmp.getTemporada().getSerie();
 				catTmp = sTmp.getCategoria();
 
 				System.out.println("    - \"" + sTmp.getTitulo() + "\" (" +
 						((catTmp == CategoriaSerie.ESTANDAR) ? "ESTANDAR" :
 						((catTmp == CategoriaSerie.GOLD) ? "GOLD": "SILVER")) +
-						") " + cr.getReferenceById(c.getIdCapitulo()).getTitulo() +
+						") " + getCapituloById(c.getIdCapitulo()).getTitulo() +
 						": " + c.getImporte() + " EUR");
 			}
 		}
@@ -316,7 +254,7 @@ public class AppFeeder implements CommandLineRunner {
 		System.out.println("\n[*] Visualizaciones del usuario \"" + u.getNombre() + "\":");
 		Capitulo cTmp;
 		for (long idCapitulo: u.getCapitulosVistos()) {
-			cTmp = cr.getReferenceById(idCapitulo);
+			cTmp = getCapituloById(idCapitulo);
 			System.out.println("  >> \"" +
 					cTmp.getTemporada().getSerie().getTitulo() + "\": \"" +
 					cTmp.getTitulo() + "\"");
@@ -355,9 +293,9 @@ public class AppFeeder implements CommandLineRunner {
 
 		/* Nueva visualización de un capítulo de una serie GOLD (sin cuota fija) */
 		System.out.println("[*] Registrando visualizaciones: Mr. Robot - (01x01, 01x02, 01x03)");
-		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 1));
-		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 2));
-		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 3));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 1));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 2));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 3));
 
 		/* Comprueba las visualizaciones y los recibos del usuario */
 		muestraVisualizacionesUsuario(u);
@@ -381,9 +319,9 @@ public class AppFeeder implements CommandLineRunner {
 
 		/* Registra visualizaciones de capítulos de una serie SILVER */
 		System.out.println("\n[*] Registrando visualizaciones: Young Sheldon - (01x01, 02x01, 03x03)");
-		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Young Sheldon", 1, 1));
-		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Young Sheldon", 2, 1));
-		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Young Sheldon", 3, 3));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Young Sheldon", 1, 1));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Young Sheldon", 2, 1));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Young Sheldon", 3, 3));
 
 		/* Comprueba las visualizaciones y los recibos del usuario, así como sus
 		 * series con objeto de comprobar si se ha registrado la serie como
@@ -421,9 +359,9 @@ public class AppFeeder implements CommandLineRunner {
 
 		/* Nueva visualización de un capítulo de una serie GOLD (con cuota fija) */
 		System.out.println("[*] Registrando visualizaciones: Mr. Robot - (01x01, 01x02, 01x03)");
-		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 1));
-		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 2));
-		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 3));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 1));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 2));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 3));
 
 		/* Comprueba las visualizaciones y los recibos del usuario */
 		muestraVisualizacionesUsuario(u);
@@ -444,9 +382,9 @@ public class AppFeeder implements CommandLineRunner {
 		/* Registra visualizaciones de capítulos de una serie SILVER y genera
 		 * un nuevo recibo */
 		System.out.println("\n[*] Registrando visualizaciones: Young Sheldon - (01x01, 02x01, 03x03)");
-		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Young Sheldon", 1, 1));
-		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Young Sheldon", 2, 1));
-		u.registraVisualizacion(cr.findByTituloSerieAndIndTempAndIndCap("Young Sheldon", 3, 3));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Young Sheldon", 1, 1));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Young Sheldon", 2, 1));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Young Sheldon", 3, 3));
 
 		System.out.println("\n[*] Emitiendo último recibo");
 		u.addRecibo();
@@ -457,6 +395,50 @@ public class AppFeeder implements CommandLineRunner {
 		muestraRecibosUsuario(u);
 	}
 
+	/****** TEST ReciboRepository ********************************************/
+	private void testReciboRepository() {
+		Usuario u = new Usuario("bongocat", "bongocat12345", false, "ES1342134213423142134200");
+		System.out.println("\nRegistrando nuevo usuario \"bongocat\"");
+		ur.save(u);
+
+		System.out.println("[*] Registrando visualizaciones: \"Mr. Robot\" (01x01, 01x02, 01x03)");
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 1));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 2));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 3));
+
+		System.out.println("[*] Emitiendo recibo");
+		u.addRecibo();
+		muestraRecibosUsuario(u);
+
+		System.out.println("[*] Registrando visualizaciones: \"The Office\" (01x01, 01x02, 01x03)");
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("The Office", 1, 1));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("The Office", 1, 2));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("The Office", 1, 3));
+
+		System.out.println("[*] Emitiendo recibo");
+		u.addRecibo();
+		muestraRecibosUsuario(u);
+
+		System.out.println("[*] Eliminando usuario \"bongocat\"");
+		ur.delete(u);
+		System.out.println("[*] Usuario \"bongocat\" " +
+				((ur.findByNombre("bongocat") != null) ? "no" : "") +
+				" eliminado");
+		
+		System.out.println("[*] Recibos registrados:");
+		Capitulo cap;
+		for (Recibo r: rr.findAll()) {
+			if (r.getFechaEmision() != null) {
+				System.out.println(">> Fecha: " + r.getFechaEmision().toString());
+				for (Cargo c: r.getCargos()) {
+					cap = getCapituloById(c.getIdCapitulo());
+					System.out.println("    -- " + cap.getTemporada().getSerie().getTitulo() +
+									   "\" (" + cap.getTitulo() + "): " + c.getImporte() +
+									   " EUR");
+				}
+			}
+		}
+	}
 
 	/****** FEED usuarios *****************************************************/
 	private void feedUsuarios() {
@@ -468,9 +450,6 @@ public class AppFeeder implements CommandLineRunner {
 
 	/****** FEED series *******************************************************/
 	private void feedSeries() {
-		/* Registro de las series en la BD */
-		sr.save(s1); sr.save(s2); sr.save(s3);
-
 		/* -- Temporadas -- */
 		Temporada t1s1 = new Temporada(1, s1);
 		Temporada t2s1 = new Temporada(2, s1);
@@ -483,11 +462,6 @@ public class AppFeeder implements CommandLineRunner {
 		Temporada t1s3 = new Temporada(1, s3);
 		Temporada t2s3 = new Temporada(2, s3);
 		Temporada t3s3 = new Temporada(3, s3);
-
-		/* Registro de las temporadas en la BD */
-		tr.save(t1s1); tr.save(t2s1); tr.save(t3s1);
-		tr.save(t1s2); tr.save(t2s2); tr.save(t3s2);
-		tr.save(t1s3); tr.save(t2s3); tr.save(t3s3);
 
 		/* -- Capitulos@s1 -- */
 		Capitulo c1t1s1 = new Capitulo("01x01", "URLc1t1s1", "DESCc1t1s1", t1s1, 1);
@@ -528,19 +502,6 @@ public class AppFeeder implements CommandLineRunner {
 		Capitulo c2t3s3 = new Capitulo("03x02", "URLc2t3s3", "DESCc2t3s3", t3s3, 2);
 		Capitulo c3t3s3 = new Capitulo("03x03", "URLc3t3s3", "DESCc3t3s3", t3s3, 3);
 
-		/* Registro de los capítulos en la BD */
-		cr.save(c1t1s1); cr.save(c2t1s1); cr.save(c3t1s1);
-		cr.save(c1t2s1); cr.save(c2t2s1); cr.save(c3t2s1);
-		cr.save(c1t3s1); cr.save(c2t3s1); cr.save(c3t3s1);
-
-		cr.save(c1t1s2); cr.save(c2t1s2); cr.save(c3t1s2);
-		cr.save(c1t2s2); cr.save(c2t2s2); cr.save(c3t2s2);
-		cr.save(c1t3s2); cr.save(c2t3s2); cr.save(c3t3s2);
-
-		cr.save(c1t1s3); cr.save(c2t1s3); cr.save(c3t1s3);
-		cr.save(c1t2s3); cr.save(c2t2s3); cr.save(c3t2s3);
-		cr.save(c1t3s3); cr.save(c2t3s3); cr.save(c3t3s3);
-
 		/* Anhade las temporadas a las series  */
 		s1.addTemporada(t1s1); s1.addTemporada(t2s1); s1.addTemporada(t3s1);
 		s2.addTemporada(t1s2); s2.addTemporada(t2s2); s2.addTemporada(t3s2);
@@ -558,5 +519,8 @@ public class AppFeeder implements CommandLineRunner {
 		t1s3.addCapitulo(c1t1s3); t1s3.addCapitulo(c2t1s3); t1s3.addCapitulo(c3t1s3);
 		t2s3.addCapitulo(c1t2s3); t2s3.addCapitulo(c2t2s3); t2s3.addCapitulo(c3t2s3);
 		t3s3.addCapitulo(c1t3s3); t3s3.addCapitulo(c2t3s3); t3s3.addCapitulo(c3t3s3);
+
+		/* Registro de las series en la BD */
+		sr.save(s1); sr.save(s2); sr.save(s3);
 	}
 }

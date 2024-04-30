@@ -126,8 +126,11 @@ public class Usuario {
 			 * que pertenezca a la temporada con mayor indice */
 			for (Temporada t: seriesEmpezadas.get(id).getTemporadas())
 				for (Long idTmp: capitulosVistos)
-					if (t.getCapitulo(idTmp) != null && t.getIndice() > mayorIndiceTemporada)
-						mayorIndiceTemporada = t.getIndice();
+					for (Capitulo c: t.getCapitulos().values())
+						if (c.getId() == idTmp && t.getIndice() > mayorIndiceTemporada) {
+							mayorIndiceTemporada = t.getIndice();
+							break;
+						}
 
 			return seriesEmpezadas.get(id).getTemporadas().get(mayorIndiceTemporada - 1);
 		}

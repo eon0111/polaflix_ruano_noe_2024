@@ -20,7 +20,7 @@ import jakarta.persistence.OneToMany;
 public class Serie {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
 	private String titulo;

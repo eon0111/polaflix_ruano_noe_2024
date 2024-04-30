@@ -15,7 +15,7 @@ import jakarta.persistence.Id;
 public class Recibo {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
 	private double importe;
