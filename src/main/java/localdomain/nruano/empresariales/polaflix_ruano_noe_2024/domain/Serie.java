@@ -1,9 +1,11 @@
-package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.dominio;
+package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonView;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
@@ -15,6 +17,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views;
 
 @Entity
 public class Serie {
@@ -23,6 +26,7 @@ public class Serie {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
+	@JsonView(Views.DatosUsuario.class)
 	private String titulo;
 
 	@Enumerated(EnumType.STRING)

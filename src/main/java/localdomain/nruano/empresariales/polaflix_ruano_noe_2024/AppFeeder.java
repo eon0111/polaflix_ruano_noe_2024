@@ -7,8 +7,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import jakarta.transaction.Transactional;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.dominio.*;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.repositorios.*;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.*;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.repositories.*;
 
 @Component
 public class AppFeeder implements CommandLineRunner {

@@ -1,8 +1,8 @@
-package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.repositorios;
+package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.dominio.Serie;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Serie;
 
 public interface SerieRepository extends JpaRepository<Serie, Long> {
 

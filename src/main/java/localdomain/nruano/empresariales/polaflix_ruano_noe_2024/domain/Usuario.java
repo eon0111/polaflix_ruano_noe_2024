@@ -1,8 +1,13 @@
-package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.dominio;
+package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.Stack;
+
+import javax.swing.text.View;
+
+import com.fasterxml.jackson.annotation.JsonView;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,15 +19,23 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views;
 
 @Entity
 public class Usuario {
 
 	@Id
+	@JsonView({ Views.DatosUsuario.class,
+				Views.NuevoUsuario.class })
 	private String nombre;
 
+	@JsonView(Views.NuevoUsuario.class)
 	private String contrasenha;
+
+	@JsonView(Views.NuevoUsuario.class)
 	private boolean cuotaFija;
+
+	@JsonView(Views.NuevoUsuario.class)
 	private String iban;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -31,11 +44,18 @@ public class Usuario {
 	private Set<Long> capitulosVistos;
 
 	@ManyToMany
+	@JsonView(Views.DatosUsuario.class)
 	private Map<Long, Serie> seriesTerminadas;
+
 	@ManyToMany
+	@JsonView(Views.DatosUsuario.class)
 	private Map<Long, Serie> seriesPendientes;
+	
 	@ManyToMany
+	@JsonView(Views.DatosUsuario.class)
 	private Map<Long, Serie> seriesEmpezadas;
+
+	// TODO: atributo foto de perfil + @JsonView({ Views.DatosUsuario.class, Views.NuevoUsuario.class })
 	
 	/* Costes de las visualizaciones en funcion del tipo de serie o la suscripcion */
 	private static final double CUOTA_FIJA = 20.0;

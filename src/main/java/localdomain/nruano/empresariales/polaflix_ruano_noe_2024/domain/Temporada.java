@@ -1,4 +1,4 @@
-package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.dominio;
+package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain;
 
 import java.util.HashMap;
 import java.util.Map;
