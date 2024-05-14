@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import jakarta.persistence.Embeddable;
+import jakarta.persistence.ManyToMany;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views;
 
 @Embeddable
@@ -16,8 +17,9 @@ public class Cargo {
 	@JsonView(Views.DatosFacturas.class)
 	private double importe;
 
+	@ManyToMany
 	@JsonView(Views.DatosFacturas.class)
-	private String tituloSerie;
+	private Serie serie;
 
 	@JsonView(Views.DatosFacturas.class)
 	private int indTemporada;
@@ -36,10 +38,10 @@ public class Cargo {
 	 * @param importe el importe a cobrar por la visualizacion
 	 */
 	public Cargo(LocalDateTime fechaVisualizacion, double importe,
-				 String tituloSerie, int indTemporada, int indCapitulo) {
+				 Serie serie, int indTemporada, int indCapitulo) {
 		this.fechaVisualizacion = fechaVisualizacion;
 		this.importe = importe;
-		this.tituloSerie = tituloSerie;
+		this.serie = serie;
 		this.indTemporada = indTemporada;
 		this.indCapitulo = indCapitulo;
 	}
@@ -49,10 +51,7 @@ public class Cargo {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((fechaVisualizacion == null) ? 0 : fechaVisualizacion.hashCode());
-		long temp;
-		temp = Double.doubleToLongBits(importe);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + ((tituloSerie == null) ? 0 : tituloSerie.hashCode());
+		result = prime * result + ((serie == null) ? 0 : serie.hashCode());
 		result = prime * result + indTemporada;
 		result = prime * result + indCapitulo;
 		return result;
@@ -66,16 +65,15 @@ public class Cargo {
 			return false;
 
 		Cargo other = (Cargo) obj;
-		if (fechaVisualizacion == null && other.fechaVisualizacion != null) {
+		if (fechaVisualizacion == null && other.fechaVisualizacion != null || 
+			!fechaVisualizacion.equals(other.fechaVisualizacion)) {
 			return false;
-		} else if (!fechaVisualizacion.equals(other.fechaVisualizacion) ||
-				   Double.doubleToLongBits(importe) != Double.doubleToLongBits(other.importe) ||
-				   (tituloSerie == null && other.tituloSerie != null)) {
+		}
+		if (serie == null && other.serie != null ||
+			(!serie.equals(other.serie) || indTemporada != other.indTemporada ||
+			indCapitulo != other.indCapitulo)) {
 			return false;
-		} else if (!tituloSerie.equals(other.tituloSerie) ||
-				   indTemporada != other.indTemporada ||
-				   indCapitulo != other.indCapitulo)
-			return false;
+		}
 		return true;
 	}
 
@@ -89,8 +87,8 @@ public class Cargo {
 		return importe;
 	}
 
-	public String getTituloSerie() {
-		return tituloSerie;
+	public Serie getSerie() {
+		return serie;
 	}
 
 	public int getIndTemporada() {
@@ -111,8 +109,8 @@ public class Cargo {
 		this.importe = importe;
 	}
 
-	public void setTitulo(String tituloSerie) {
-		this.tituloSerie = tituloSerie;
+	public void setSerie(Serie serie) {
+		this.serie = serie;
 	}
 
 	public void setIndTemporada(int indTemporada) {

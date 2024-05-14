@@ -36,9 +36,7 @@ public class Usuario {
 	@JsonView(Views.DatosFacturas.class)
 	private List<Factura> facturas;
 
-	// private Set<Long> capitulosVistos;
-
-	/* Un mapa que, por cada serie visualizada, y por cada temporada de esas
+	/* Un mapa que, por cada serie visualizada y por cada temporada de esas
 	 * series, alberga las visualizaciones de cada capítulo */
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JsonView(Views.DatosVisualizaciones.class)
@@ -58,13 +56,6 @@ public class Usuario {
 
 	// TODO: atributo foto de perfil + @JsonView({ Views.DatosUsuario.class, Views.NuevoUsuario.class })
 	
-	/* Costes de las visualizaciones en funcion del tipo de serie o la suscripcion */
-	// TODO: extraer estas constantes a otra clase
-	private static final double CUOTA_FIJA = 20.0;
-	private static final double PRECIO_ESTANDAR = 0.5;
-	private static final double PRECIO_SILVER = 0.75;
-	private static final double PRECIO_GOLD = 1.5;
-
 	/**
 	 * Constructor vacio.
 	 */
@@ -87,7 +78,6 @@ public class Usuario {
 		this.facturas = new Stack<Factura>();
 		facturas.addLast(new Factura());
 
-		// this.capitulosVistos = new HashSet<Long>();
 		this.visualizacionesSeries = new HashMap<Long, VisualizacionSerie>();
 		this.seriesEmpezadas = new HashMap<Long, Serie>();
 		this.seriesPendientes = new HashMap<Long, Serie>();
@@ -112,27 +102,24 @@ public class Usuario {
 			seriesEmpezadas.remove(c.getTemporada().getSerie().getId());
 
 		CategoriaSerie categoria = sTmp.getCategoria();
-		double importe = (cuotaFija) ? CUOTA_FIJA :
-						((categoria == CategoriaSerie.ESTANDAR)	? PRECIO_ESTANDAR :
-						((categoria == CategoriaSerie.GOLD)		? PRECIO_GOLD :
-						((categoria == CategoriaSerie.SILVER)	? PRECIO_SILVER : -1)));
+		double importe = (cuotaFija) ? PrecioVisualizacion.CUOTA_FIJA :
+						((categoria == CategoriaSerie.ESTANDAR)	? PrecioVisualizacion.PRECIO_ESTANDAR :
+						((categoria == CategoriaSerie.GOLD)		? PrecioVisualizacion.PRECIO_GOLD :
+						((categoria == CategoriaSerie.SILVER)	? PrecioVisualizacion.PRECIO_SILVER : -1)));
 
 		// Se anhade la visualizacion del capitulo a la última factura
 		facturas.getLast().anhadeCargo(new Cargo(LocalDateTime.now(),
 												 importe,
-												 c.getTemporada().getSerie().getTitulo(),
+												 c.getTemporada().getSerie(),
 												 c.getTemporada().getIndice(),
 												 c.getIndice()));
 
 		/* Se anhade la serie a la que pertenece el capítulo al listado de
 		 * series vistas si el capítulo es el último de la serie */
-		if (c.isUltimoCapituloSerie())
-			seriesTerminadas.put(c.getTemporada().getSerie().getId(),
-								 c.getTemporada().getSerie());
+		if (c.isUltimoCapituloSerie()) seriesTerminadas.put(sTmp.getId(), sTmp);
 
 		// Se registra la visualizacion del capitulo
-		// if(!capitulosVistos.contains(c.getId())) capitulosVistos.add(c.getId());
-		long idSerie = c.getTemporada().getSerie().getId();
+		long idSerie = sTmp.getId();
 		int indiceTemprada = c.getTemporada().getIndice();
 
 		if (visualizacionesSeries.get(idSerie) == null) {
@@ -262,7 +249,7 @@ public class Usuario {
 
 	public void addFactura() {
 		facturas.getLast().setFechaEmision(LocalDateTime.now());
-		if (cuotaFija) facturas.getLast().setImporte(CUOTA_FIJA);
+		if (cuotaFija) facturas.getLast().setImporte(PrecioVisualizacion.CUOTA_FIJA);
 		facturas.addLast(new Factura());
 	}
 

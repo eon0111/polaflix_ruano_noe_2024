@@ -17,6 +17,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views;
 
 @Entity

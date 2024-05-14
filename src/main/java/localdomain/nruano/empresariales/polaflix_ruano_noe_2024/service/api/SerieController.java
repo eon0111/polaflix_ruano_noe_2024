@@ -12,18 +12,19 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Serie;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.repositories.SerieRepository;
 
 @RestController
 @RequestMapping("/series")
 public class SerieController {
 
     @Autowired
-    SerieService ss;
+    SerieRepository sr;
 
     @GetMapping
     @JsonView(Views.DatosSerie.class)
     public ResponseEntity<ArrayList<Serie>> obtenerSeriesPorInicial(@PathVariable("inicial") char inicial) {
-        ArrayList<Serie> s = ss.getSeriesByInicial(inicial);
+        ArrayList<Serie> s = sr.findByTituloStartingWith(inicial);
         ResponseEntity<ArrayList<Serie>> result;
 
 		if (!s.isEmpty()) {

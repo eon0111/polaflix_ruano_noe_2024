@@ -22,9 +22,6 @@ public class AppFeeder implements CommandLineRunner {
 	@Autowired
 	protected SerieRepository sr;
 
-	@Autowired
-	protected FacturaRepository fr;
-	
 	/* -- Series -- */
 	private ArrayList<Serie> series;
 	private Serie s1 = new Serie("Mr. Robot", CategoriaSerie.GOLD, "Mr. Robot is a techno thriller that follows Elliot, a young programmer...");;
@@ -57,10 +54,6 @@ public class AppFeeder implements CommandLineRunner {
 
 		System.out.println(">>>>> Test Usuario (CON cuota fija) >>>>>>\n");
 		testUsuarioCuotaFija();
-		System.out.println("\n==========================================");
-
-		System.out.println(">>>>> Test ReciboRepository >>>>>>\n");
-		testReciboRepository();
 		System.out.println("\n==========================================");
 	}
 
@@ -243,7 +236,7 @@ public class AppFeeder implements CommandLineRunner {
 					" |#| Importe: " + f.getImporte() + " EUR");
 
 			for (Cargo c: f.getCargos()) {
-				cTmp = getCapituloByTitSerieIndTempIndCap(c.getTituloSerie(),
+				cTmp = getCapituloByTitSerieIndTempIndCap(c.getSerie().getTitulo(),
 														  c.getIndTemporada(),
 														  c.getIndCapitulo());
 				sTmp = cTmp.getTemporada().getSerie();
@@ -402,53 +395,6 @@ public class AppFeeder implements CommandLineRunner {
 		 * series con objeto de comprobar si se ha registrado la serie como
 		 * terminada, al haber sido visualizado su último capítulo */
 		muestraRecibosUsuario(u);
-	}
-
-	/****** TEST ReciboRepository ********************************************/
-	private void testReciboRepository() {
-		Usuario u = new Usuario("bongocat", "bongocat12345", false, "ES1342134213423142134200");
-		System.out.println("\nRegistrando nuevo usuario \"bongocat\"");
-		ur.save(u);
-
-		System.out.println("[*] Registrando visualizaciones: \"Mr. Robot\" (01x01, 01x02, 01x03)");
-		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 1));
-		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 2));
-		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 3));
-
-		System.out.println("[*] Emitiendo recibo");
-		u.addFactura();
-		muestraRecibosUsuario(u);
-
-		System.out.println("[*] Registrando visualizaciones: \"The Office\" (01x01, 01x02, 01x03)");
-		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("The Office", 1, 1));
-		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("The Office", 1, 2));
-		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("The Office", 1, 3));
-
-		System.out.println("[*] Emitiendo recibo");
-		u.addFactura();
-		muestraRecibosUsuario(u);
-
-		System.out.println("[*] Eliminando usuario \"bongocat\"");
-		ur.delete(u);
-		System.out.println("[*] Usuario \"bongocat\" " +
-				((ur.findByNombre("bongocat") != null) ? "no" : "") +
-				" eliminado");
-		
-		System.out.println("[*] Recibos registrados:");
-		Capitulo cap;
-		for (Factura r: fr.findAll()) {
-			if (r.getFechaEmision() != null) {
-				System.out.println(">> Fecha: " + r.getFechaEmision().toString());
-				for (Cargo c: r.getCargos()) {
-					cap = getCapituloByTitSerieIndTempIndCap(c.getTituloSerie(),
-															 c.getIndTemporada(),
-															 c.getIndCapitulo());
-					System.out.println("    -- " + cap.getTemporada().getSerie().getTitulo() +
-									   "\" (" + cap.getTitulo() + "): " + c.getImporte() +
-									   " EUR");
-				}
-			}
-		}
 	}
 
 	/****** FEED usuarios *****************************************************/
