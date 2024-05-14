@@ -26,11 +26,16 @@ public class Serie {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@JsonView(Views.DatosUsuario.class)
+	@JsonView({ Views.DatosSerie.class,
+				Views.DatosUsuario.class,
+				Views.DatosTemporada.class,
+				Views.DatosVisualizaciones.class })
 	private String titulo;
 
 	@Enumerated(EnumType.STRING)
 	private CategoriaSerie categoria;
+
+	@JsonView(Views.DatosSerie.class)
 	private String sinopsis;
 
 	@OneToMany(mappedBy = "serie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -105,6 +110,10 @@ public class Serie {
 
 	public List<Temporada> getTemporadas() {
 		return temporadas;
+	}
+
+	public Temporada getTemporadaByIndice(int indice) {
+		return temporadas.get(indice);
 	}
 
 	public int getNumTemporadas() {

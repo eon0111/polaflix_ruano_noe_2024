@@ -1,10 +1,13 @@
 package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views;
 
 @Entity
 public class Capitulo {
@@ -13,13 +16,18 @@ public class Capitulo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @JsonView(Views.DatosTemporada.class)
     private int indice;
 
     @ManyToOne
     private Temporada temporada;
     
+    @JsonView(Views.DatosTemporada.class)
     private String titulo;
+
+    @JsonView(Views.DatosTemporada.class)
     private String enlace;
+    
     private String descripcion;
 
     /**

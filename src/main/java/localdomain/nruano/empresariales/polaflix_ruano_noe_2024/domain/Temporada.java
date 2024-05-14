@@ -1,7 +1,9 @@
 package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonView;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -11,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views;
 
 @Entity
 public class Temporada {
@@ -19,13 +22,15 @@ public class Temporada {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
+	@JsonView(Views.DatosTemporada.class)
     private int indice;
 
 	@ManyToOne
     private Serie serie;
 
 	@OneToMany(mappedBy = "temporada", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private Map<Long, Capitulo> capitulos;
+	@JsonView(Views.DatosTemporada.class)
+	private List<Capitulo> capitulos;
 
 	/**
 	 * Constructor vacio.
@@ -40,7 +45,7 @@ public class Temporada {
     public Temporada(int indice, Serie serie) {
         this.indice = indice;
         this.serie = serie;
-		this.capitulos = new HashMap<Long, Capitulo>();
+		this.capitulos = new ArrayList<Capitulo>();
     }
 
 	@Override
@@ -75,11 +80,11 @@ public class Temporada {
         return serie;
     }
 
-	public Map<Long, Capitulo> getCapitulos() {
+	public List<Capitulo> getCapitulos() {
 		return capitulos;
 	}
 
-	public Capitulo getCapitulo(long indice) {
+	public Capitulo getCapitulo(int indice) {
 		return capitulos.get(indice);
 	}
 
@@ -105,12 +110,12 @@ public class Temporada {
         this.serie = serie;
     }
 
-	public void setCapitulos(Map<Long, Capitulo> capitulos) {
+	public void setCapitulos(List<Capitulo> capitulos) {
 		this.capitulos = capitulos;
 	}
 
 	public void addCapitulo(Capitulo c) {
-		this.capitulos.put((long)c.getIndice(), c);
+		this.capitulos.add(c);
 	}
 
 }

@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 
 import jakarta.transaction.Transactional;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.*;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionCapitulo;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionSerie;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionTemporada;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.repositories.*;
 
 @Component
@@ -20,7 +23,7 @@ public class AppFeeder implements CommandLineRunner {
 	protected SerieRepository sr;
 
 	@Autowired
-	protected ReciboRepository rr;
+	protected FacturaRepository fr;
 	
 	/* -- Series -- */
 	private ArrayList<Serie> series;
@@ -68,11 +71,18 @@ public class AppFeeder implements CommandLineRunner {
 	 * @return un capítulo cuyo ID coincide con el indicado, o null si no se
 	 * encuentra ningún capítulo con ese ID
 	 */
-	private Capitulo getCapituloById(long id) {
-		for (Serie s: series)
-			for (Temporada t: s.getTemporadas())
-				for (Capitulo c: t.getCapitulos().values())
-					if (c.getId() == id) return c;
+	private Capitulo getCapituloByTitSerieIndTempIndCap(String titSerie,
+														int idnTemp,
+														int indCap) {
+		for (Serie s: series) {
+			if (s.getTitulo().equals(titSerie))
+				for (Temporada t: s.getTemporadas()) {
+					if (t.getIndice() == idnTemp)
+						for (Capitulo c: t.getCapitulos())
+							if (c.getIndice() == indCap)
+								return c;
+				}
+		}
 
 		return null;
 	}
@@ -91,7 +101,7 @@ public class AppFeeder implements CommandLineRunner {
 			if (s.getTitulo().equals(titulo))
 				for (Temporada t: s.getTemporadas())
 					if (t.getIndice() == indTemp)
-						for (Capitulo c: t.getCapitulos().values())
+						for (Capitulo c: t.getCapitulos())
 							if (c.getIndice() == indCap) return c;
 		return null;
 	}
@@ -139,7 +149,7 @@ public class AppFeeder implements CommandLineRunner {
 		System.out.println("[*] Serie registrada: \"" + sr.findByTitulo("Test").getTitulo() + "\"");
 		for (Temporada t: sr.findByTitulo("Test").getTemporadas()) {
 			System.out.println("  >> Temporada " + t.getIndice() + ":");
-			for (Capitulo c: t.getCapitulos().values()) {
+			for (Capitulo c: t.getCapitulos()) {
 				System.out.println("    -- Capitulo: " + c.getIndice() + "\": " + c.getTitulo() + "\"");
 			}
 		}
@@ -226,22 +236,23 @@ public class AppFeeder implements CommandLineRunner {
 		Serie sTmp;
 		CategoriaSerie catTmp;
 
-		for (Recibo r: u.getRecibos()) {
-			System.out.println("  >> Creado: " + r.getFechaCreacion().toString() +
+		for (Factura f: u.getFacturas()) {
+			System.out.println("  >> Creado: " + f.getFechaCreacion().toString() +
 					" |#| Emitido: " +
-					((r.getFechaEmision() == null) ? "PENDIENTE" : r.getFechaEmision()) + 
-					" |#| Importe: " + r.getImporte() + " EUR");
+					((f.getFechaEmision() == null) ? "PENDIENTE" : f.getFechaEmision()) + 
+					" |#| Importe: " + f.getImporte() + " EUR");
 
-			for (Cargo c: r.getCargos()) {
-				cTmp = getCapituloById(c.getIdCapitulo());
+			for (Cargo c: f.getCargos()) {
+				cTmp = getCapituloByTitSerieIndTempIndCap(c.getTituloSerie(),
+														  c.getIndTemporada(),
+														  c.getIndCapitulo());
 				sTmp = cTmp.getTemporada().getSerie();
 				catTmp = sTmp.getCategoria();
 
 				System.out.println("    - \"" + sTmp.getTitulo() + "\" (" +
 						((catTmp == CategoriaSerie.ESTANDAR) ? "ESTANDAR" :
 						((catTmp == CategoriaSerie.GOLD) ? "GOLD": "SILVER")) +
-						") " + getCapituloById(c.getIdCapitulo()).getTitulo() +
-						": " + c.getImporte() + " EUR");
+						") " + cTmp.getTitulo() + ": " + c.getImporte() + " EUR");
 			}
 		}
 	}
@@ -251,14 +262,12 @@ public class AppFeeder implements CommandLineRunner {
 	 * @param u el usuario
 	 */
 	private void muestraVisualizacionesUsuario(Usuario u) {
-		System.out.println("\n[*] Visualizaciones del usuario \"" + u.getNombre() + "\":");
-		Capitulo cTmp;
-		for (long idCapitulo: u.getCapitulosVistos()) {
-			cTmp = getCapituloById(idCapitulo);
-			System.out.println("  >> \"" +
-					cTmp.getTemporada().getSerie().getTitulo() + "\": \"" +
-					cTmp.getTitulo() + "\"");
-		}
+		for (VisualizacionSerie vs : u.getVisualizacionesSeries().values())
+			for (VisualizacionTemporada vt : vs.getVisualizacionesTemporadas().values())
+				for (VisualizacionCapitulo vc : vt.getCapitulosVistos().values())
+					System.out.println("  >> \"" +
+							vs.getSerie().getTitulo() + "\": \"" +
+							vs.getSerie().getTemporadaByIndice(vt.getIndice() - 1).getCapitulo(vc.getIndice() - 1).getTitulo() + "\"");
 	}
 
 	/**
@@ -305,7 +314,7 @@ public class AppFeeder implements CommandLineRunner {
 
 		/* Emite un recibo */
 		System.out.println("\n[*] Emitiendo último recibo");
-		u.addRecibo();
+		u.addFactura();
 
 		/* Comprueba los recibos del usuario para ver que la fecha de emisión se
 		 * registra correctamente */
@@ -371,7 +380,7 @@ public class AppFeeder implements CommandLineRunner {
 
 		/* Emite un recibo */
 		System.out.println("\n[*] Emitiendo último recibo");
-		u.addRecibo();
+		u.addFactura();
 
 		/* Comprueba los recibos del usuario para ver que la fecha de emisión se
 		 * registra correctamente */
@@ -387,7 +396,7 @@ public class AppFeeder implements CommandLineRunner {
 		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Young Sheldon", 3, 3));
 
 		System.out.println("\n[*] Emitiendo último recibo");
-		u.addRecibo();
+		u.addFactura();
 
 		/* Comprueba las visualizaciones y los recibos del usuario, así como sus
 		 * series con objeto de comprobar si se ha registrado la serie como
@@ -407,7 +416,7 @@ public class AppFeeder implements CommandLineRunner {
 		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 3));
 
 		System.out.println("[*] Emitiendo recibo");
-		u.addRecibo();
+		u.addFactura();
 		muestraRecibosUsuario(u);
 
 		System.out.println("[*] Registrando visualizaciones: \"The Office\" (01x01, 01x02, 01x03)");
@@ -416,7 +425,7 @@ public class AppFeeder implements CommandLineRunner {
 		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("The Office", 1, 3));
 
 		System.out.println("[*] Emitiendo recibo");
-		u.addRecibo();
+		u.addFactura();
 		muestraRecibosUsuario(u);
 
 		System.out.println("[*] Eliminando usuario \"bongocat\"");
@@ -427,11 +436,13 @@ public class AppFeeder implements CommandLineRunner {
 		
 		System.out.println("[*] Recibos registrados:");
 		Capitulo cap;
-		for (Recibo r: rr.findAll()) {
+		for (Factura r: fr.findAll()) {
 			if (r.getFechaEmision() != null) {
 				System.out.println(">> Fecha: " + r.getFechaEmision().toString());
 				for (Cargo c: r.getCargos()) {
-					cap = getCapituloById(c.getIdCapitulo());
+					cap = getCapituloByTitSerieIndTempIndCap(c.getTituloSerie(),
+															 c.getIndTemporada(),
+															 c.getIndCapitulo());
 					System.out.println("    -- " + cap.getTemporada().getSerie().getTitulo() +
 									   "\" (" + cap.getTitulo() + "): " + c.getImporte() +
 									   " EUR");

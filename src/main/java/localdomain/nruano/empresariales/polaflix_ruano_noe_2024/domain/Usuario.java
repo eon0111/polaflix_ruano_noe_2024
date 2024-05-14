@@ -1,15 +1,10 @@
 package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain;
 
-import java.time.LocalDateTime;
-import java.util.Set;
-import java.util.Stack;
-
-import javax.swing.text.View;
-
 import com.fasterxml.jackson.annotation.JsonView;
 
+import java.time.LocalDateTime;
+import java.util.Stack;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -19,29 +14,35 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionCapitulo;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionSerie;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionTemporada;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views;
 
 @Entity
 public class Usuario {
 
 	@Id
-	@JsonView({ Views.DatosUsuario.class,
-				Views.NuevoUsuario.class })
+	@JsonView(Views.DatosUsuario.class)
 	private String nombre;
 
-	@JsonView(Views.NuevoUsuario.class)
 	private String contrasenha;
 
-	@JsonView(Views.NuevoUsuario.class)
 	private boolean cuotaFija;
 
-	@JsonView(Views.NuevoUsuario.class)
 	private String iban;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<Recibo> recibos;
+	@JsonView(Views.DatosFacturas.class)
+	private List<Factura> facturas;
 
-	private Set<Long> capitulosVistos;
+	// private Set<Long> capitulosVistos;
+
+	/* Un mapa que, por cada serie visualizada, y por cada temporada de esas
+	 * series, alberga las visualizaciones de cada capítulo */
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonView(Views.DatosVisualizaciones.class)
+	private Map<Long, VisualizacionSerie> visualizacionesSeries;
 
 	@ManyToMany
 	@JsonView(Views.DatosUsuario.class)
@@ -58,6 +59,7 @@ public class Usuario {
 	// TODO: atributo foto de perfil + @JsonView({ Views.DatosUsuario.class, Views.NuevoUsuario.class })
 	
 	/* Costes de las visualizaciones en funcion del tipo de serie o la suscripcion */
+	// TODO: extraer estas constantes a otra clase
 	private static final double CUOTA_FIJA = 20.0;
 	private static final double PRECIO_ESTANDAR = 0.5;
 	private static final double PRECIO_SILVER = 0.75;
@@ -82,10 +84,11 @@ public class Usuario {
 		this.cuotaFija = cuotaFija;
 		this.iban = iban;
 
-		this.recibos = new Stack<Recibo>();
-		recibos.addLast(new Recibo());
+		this.facturas = new Stack<Factura>();
+		facturas.addLast(new Factura());
 
-		this.capitulosVistos = new HashSet<Long>();
+		// this.capitulosVistos = new HashSet<Long>();
+		this.visualizacionesSeries = new HashMap<Long, VisualizacionSerie>();
 		this.seriesEmpezadas = new HashMap<Long, Serie>();
 		this.seriesPendientes = new HashMap<Long, Serie>();
 		this.seriesTerminadas = new HashMap<Long, Serie>();
@@ -93,7 +96,7 @@ public class Usuario {
 
 	/**
 	 * Registra la visualización de un capítulo y anhade el cargo correspondiente
-	 * al recibo del usuario.
+	 * a la factura del usuario.
 	 */
 	public void registraVisualizacion(Capitulo c) {
 		Serie sTmp = c.getTemporada().getSerie();
@@ -114,11 +117,12 @@ public class Usuario {
 						((categoria == CategoriaSerie.GOLD)		? PRECIO_GOLD :
 						((categoria == CategoriaSerie.SILVER)	? PRECIO_SILVER : -1)));
 
-		// Se anhade la visualizacion del capitulo al ultimo recibo
-		recibos.getLast().anhadeCargo(
-				new Cargo(LocalDateTime.now(),
-						  c.getId(),
-						  (cuotaFija) ? 0 : importe));
+		// Se anhade la visualizacion del capitulo a la última factura
+		facturas.getLast().anhadeCargo(new Cargo(LocalDateTime.now(),
+												 importe,
+												 c.getTemporada().getSerie().getTitulo(),
+												 c.getTemporada().getIndice(),
+												 c.getIndice()));
 
 		/* Se anhade la serie a la que pertenece el capítulo al listado de
 		 * series vistas si el capítulo es el último de la serie */
@@ -127,7 +131,31 @@ public class Usuario {
 								 c.getTemporada().getSerie());
 
 		// Se registra la visualizacion del capitulo
-		if(!capitulosVistos.contains(c.getId())) capitulosVistos.add(c.getId());
+		// if(!capitulosVistos.contains(c.getId())) capitulosVistos.add(c.getId());
+		long idSerie = c.getTemporada().getSerie().getId();
+		int indiceTemprada = c.getTemporada().getIndice();
+
+		if (visualizacionesSeries.get(idSerie) == null) {
+			/* Si no se ha visualizado ningún capítulo de la serie a la que
+			 * pertenece el capítulo, se registra la visualización de la serie */
+			VisualizacionSerie vs = new VisualizacionSerie(sTmp);
+			VisualizacionTemporada vt = new VisualizacionTemporada(c.getTemporada().getIndice());
+			vt.addVisualizacionCapitulo(new VisualizacionCapitulo(c.getIndice()));
+			vs.addVisualizacionTemporada(vt);
+
+			visualizacionesSeries.put(idSerie, vs);
+		} else if (visualizacionesSeries.get(idSerie).getVisualizacionesTemporada(indiceTemprada) == null) {
+			/* Si no se ha visualizado ningún capítulo de la temporada a la que
+			 * pertenece el capítulo, se registra la visualización de la temporada */
+			VisualizacionTemporada vt = new VisualizacionTemporada(c.getTemporada().getIndice());
+			vt.addVisualizacionCapitulo(new VisualizacionCapitulo(c.getIndice()));
+
+			visualizacionesSeries.get(idSerie).addVisualizacionTemporada(vt);
+		} else {
+			/* Se registra la visualización del capítulo una vez comprobado que
+			 * se han visualizado capítulos de la misma temporada */
+			visualizacionesSeries.get(idSerie).addVisualizacionCapitulo(c);
+		}
 	}
 
 	/**
@@ -139,25 +167,10 @@ public class Usuario {
 	 * en otro caso
 	 */
 	public Temporada getUltimaTemporadaSerie(long id) {
-		if (seriesEmpezadas.containsKey(id)) {
-			int mayorIndiceTemporada = 0;
-
-			/* Busca entre todos los capitulos visualizados por el usuario, aquel
-			 * que pertenezca a la temporada con mayor indice */
-			for (Temporada t: seriesEmpezadas.get(id).getTemporadas())
-				for (Long idTmp: capitulosVistos)
-					for (Capitulo c: t.getCapitulos().values())
-						if (c.getId() == idTmp && t.getIndice() > mayorIndiceTemporada) {
-							mayorIndiceTemporada = t.getIndice();
-							break;
-						}
-
-			return seriesEmpezadas.get(id).getTemporadas().get(mayorIndiceTemporada - 1);
-		}
-
-		return ((seriesPendientes.containsKey(id)) ? seriesPendientes.get(id).getTemporadas().getFirst() : 
-			   ((seriesTerminadas.containsKey(id)) ? seriesTerminadas.get(id).getTemporadas().getFirst() :
-			   null));
+		return (seriesEmpezadas.containsKey(id)) ? visualizacionesSeries.get(id).getUltimaTemporadaVista() :
+			  ((seriesPendientes.containsKey(id)) ? seriesPendientes.get(id).getTemporadas().getFirst() : 
+			  ((seriesTerminadas.containsKey(id)) ? seriesTerminadas.get(id).getTemporadas().getFirst() :
+			    null));
 	}
 
 	/**
@@ -177,17 +190,11 @@ public class Usuario {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
+		if (this != obj || getClass() != obj.getClass() || obj == null)
 			return false;
 
-		Usuario other = (Usuario) obj;
-		if (nombre == null && other.nombre != null)
-			return false;
-		else if (nombre != other.nombre)
+			Usuario other = (Usuario) obj;
+		if (nombre == null && other.nombre != null || nombre != other.nombre)
 			return false;
 		
 		return true;
@@ -211,8 +218,8 @@ public class Usuario {
 		return iban;
 	}
 
-	public Set<Long> getCapitulosVistos() {
-		return capitulosVistos;
+	public Map<Long, VisualizacionSerie> getVisualizacionesSeries() {
+		return visualizacionesSeries;
 	}
 
 	public Map<Long, Serie> getSeriesTerminadas() {
@@ -227,8 +234,8 @@ public class Usuario {
 		return seriesEmpezadas;
 	}
 
-	public List<Recibo> getRecibos() {
-		return recibos;
+	public List<Factura> getFacturas() {
+		return facturas;
 	}
 
 	/****** SETTERS ******/
@@ -249,14 +256,30 @@ public class Usuario {
 		this.iban = iban;
 	}
 
-	public void setRecibos(List<Recibo> recibos) {
-		this.recibos = recibos;
+	public void setfacturas(List<Factura> facturas) {
+		this.facturas = facturas;
 	}
 
-	public void addRecibo() {
-		recibos.getLast().setFechaEmision(LocalDateTime.now());
-		if (cuotaFija) recibos.getLast().setImporte(CUOTA_FIJA);
-		recibos.addLast(new Recibo());
+	public void addFactura() {
+		facturas.getLast().setFechaEmision(LocalDateTime.now());
+		if (cuotaFija) facturas.getLast().setImporte(CUOTA_FIJA);
+		facturas.addLast(new Factura());
+	}
+
+	public void setVisualizaciones(Map<Long, VisualizacionSerie> visualizacionesSeries) {
+		this.visualizacionesSeries = visualizacionesSeries;
+	}
+
+	public void setSeriesEmpezadas(Map<Long, Serie> seriesEmpezadas) {
+		this.seriesEmpezadas = seriesEmpezadas;
+	}
+	
+	public void setSeriesPendientes(Map<Long, Serie> seriesPendientes) {
+		this.seriesPendientes = seriesPendientes;
+	}
+
+	public void setSeriesTerminadas(Map<Long, Serie> seriesTerminadas) {
+		this.seriesTerminadas = seriesTerminadas;
 	}
 
 }

@@ -2,6 +2,9 @@ package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain;
 
 import java.time.LocalDateTime;
 import java.util.Stack;
+
+import com.fasterxml.jackson.annotation.JsonView;
+
 import java.util.List;
 
 import jakarta.persistence.ElementCollection;
@@ -10,25 +13,32 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views;
 
 @Entity
-public class Recibo {
+public class Factura {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
+	@JsonView(Views.DatosFacturas.class)
 	private double importe;
+
+	@JsonView(Views.DatosFacturas.class)
 	private LocalDateTime fechaCreacion;
+
+	@JsonView(Views.DatosFacturas.class)
     private LocalDateTime fechaEmision;
 
 	@ElementCollection(fetch = FetchType.LAZY)
+	@JsonView(Views.DatosFacturas.class)
     private List<Cargo> cargos;
 
     /**
      * Construye un recibo.
      */
-    public Recibo() {
+    public Factura() {
 		this.fechaCreacion = LocalDateTime.now();
         this.fechaEmision = null;
         this.cargos = new Stack<Cargo>();
@@ -74,7 +84,7 @@ public class Recibo {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Recibo other = (Recibo) obj;
+		Factura other = (Factura) obj;
 		if (id != other.id)
 			return false;
 		return true;
