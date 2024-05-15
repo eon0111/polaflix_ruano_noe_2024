@@ -24,6 +24,7 @@ public class Serie {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@JsonView(Views.DatosSerie.class)
 	private long id;
 
 	@JsonView({ Views.DatosSerie.class,
@@ -42,9 +43,11 @@ public class Serie {
 	private List<Temporada> temporadas;
 
 	@ElementCollection(fetch = FetchType.LAZY)
+	@JsonView(Views.DatosSerie.class)
 	private Set<PersonalSerie> creadores;
 
 	@ElementCollection(fetch = FetchType.LAZY)
+	@JsonView(Views.DatosSerie.class)
 	private Set<PersonalSerie> actores;
 
 	/**

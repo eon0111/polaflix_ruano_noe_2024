@@ -1,12 +1,20 @@
 package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import jakarta.persistence.Embeddable;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views;
 
 @Embeddable
 public class PersonalSerie {
     
+    @JsonView(Views.DatosSerie.class)
     private String nombre;
+
+    @JsonView(Views.DatosSerie.class)
     private String apellido1;
+
+    @JsonView(Views.DatosSerie.class)
     private String apellido2;
     
     /**

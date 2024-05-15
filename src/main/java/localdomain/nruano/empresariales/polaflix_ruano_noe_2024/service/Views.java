@@ -9,5 +9,6 @@ public class Views {
     public static class DatosFacturas {};
 
     public static class NuevoUsuario {};
+    public static class NuevaSerie {};
 
 }

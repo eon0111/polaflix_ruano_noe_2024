@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -67,6 +66,8 @@ public class UsuarioController {
 			@RequestBody @JsonView(Views.NuevoUsuario.class) Usuario u) {
 
 		ResponseEntity<Usuario> result;
+
+		// TODO: comprobar que ninguno de los atributos requeridos del usuario sea null y elaborar la respuesta HTTP que corresponda en caso de serlo
 		
 		if (ur.existsById(u.getNombre())) {
 			result = ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -173,7 +174,7 @@ public class UsuarioController {
 
 	@Transactional
 	@PutMapping(value = "/{nombre}/series-pendientes/{idSerie}")
-	@JsonView(Views.DatosVisualizacion.class)
+	@JsonView(Views.DatosSerie.class)
 	public ResponseEntity<Serie> anhadirSeriePendiente(
 			@PathVariable("nombre") String nombreUsuario,
 			@PathVariable("idSerie") Long idSerie) {
