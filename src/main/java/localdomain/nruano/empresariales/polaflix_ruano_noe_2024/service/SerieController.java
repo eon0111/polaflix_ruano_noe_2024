@@ -1,4 +1,4 @@
-package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api;
+package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service;
 
 import java.util.ArrayList;
 

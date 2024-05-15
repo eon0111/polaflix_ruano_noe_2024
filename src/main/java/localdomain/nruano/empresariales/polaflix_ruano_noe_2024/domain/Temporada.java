@@ -13,7 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views;
 
 @Entity
 public class Temporada {
@@ -26,6 +26,7 @@ public class Temporada {
     private int indice;
 
 	@ManyToOne
+	@JsonView(Views.DatosTemporada.class)
     private Serie serie;
 
 	@OneToMany(mappedBy = "temporada", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -85,7 +86,7 @@ public class Temporada {
 	}
 
 	public Capitulo getCapitulo(int indice) {
-		return capitulos.get(indice);
+		return capitulos.get(indice - 1);
 	}
 
 	public int getNumCapitulos() {

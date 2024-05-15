@@ -16,8 +16,8 @@ import jakarta.persistence.OneToMany;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Capitulo;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Serie;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Temporada;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views.DatosVisualizaciones;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views.DatosVisualizaciones;
 
 @Entity
 public class VisualizacionSerie {
@@ -67,7 +67,7 @@ public class VisualizacionSerie {
 
         for (VisualizacionTemporada vt: visualizacionesTemporadas.values())
             if (vt.getIndice() > t.getIndice())
-                t = serie.getTemporadaByIndice(vt.getIndice());
+                t = serie.getTemporada(vt.getIndice());
 
         return (t.getIndice() == -1) ? null : t;
     }

@@ -13,7 +13,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views;
 
 @Entity
 public class Factura {

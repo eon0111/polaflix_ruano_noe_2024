@@ -55,6 +55,13 @@ public class AppFeeder implements CommandLineRunner {
 		System.out.println(">>>>> Test Usuario (CON cuota fija) >>>>>>\n");
 		testUsuarioCuotaFija();
 		System.out.println("\n==========================================");
+
+		/*		
+		Usuario u = ur.getReferenceById("pacoloco");
+		u.registraVisualizacion(sr.findByTitulo("Mr. Robot").getTemporada(1).getCapitulo(1));
+		u.registraVisualizacion(sr.findByTitulo("The Office").getTemporada(1).getCapitulo(1));
+		u.registraVisualizacion(sr.findByTitulo("The Office").getTemporada(3).getCapitulo(2));
+		*/
 	}
 
 	/**
@@ -236,7 +243,7 @@ public class AppFeeder implements CommandLineRunner {
 					" |#| Importe: " + f.getImporte() + " EUR");
 
 			for (Cargo c: f.getCargos()) {
-				cTmp = getCapituloByTitSerieIndTempIndCap(c.getSerie().getTitulo(),
+				cTmp = getCapituloByTitSerieIndTempIndCap(c.getTituloSerie(),
 														  c.getIndTemporada(),
 														  c.getIndCapitulo());
 				sTmp = cTmp.getTemporada().getSerie();
@@ -260,7 +267,7 @@ public class AppFeeder implements CommandLineRunner {
 				for (VisualizacionCapitulo vc : vt.getCapitulosVistos().values())
 					System.out.println("  >> \"" +
 							vs.getSerie().getTitulo() + "\": \"" +
-							vs.getSerie().getTemporadaByIndice(vt.getIndice() - 1).getCapitulo(vc.getIndice() - 1).getTitulo() + "\"");
+							vs.getSerie().getTemporada(vt.getIndice()).getCapitulo(vc.getIndice()).getTitulo() + "\"");
 	}
 
 	/**
@@ -363,7 +370,7 @@ public class AppFeeder implements CommandLineRunner {
 		System.out.println("[*] Registrando visualizaciones: Mr. Robot - (01x01, 01x02, 01x03)");
 		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 1));
 		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 2));
-		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 1, 3));
+		u.registraVisualizacion(findCapByTituloSerieAndIndTempAndIndCap("Mr. Robot", 2, 3));
 
 		/* Comprueba las visualizaciones y los recibos del usuario */
 		muestraVisualizacionesUsuario(u);

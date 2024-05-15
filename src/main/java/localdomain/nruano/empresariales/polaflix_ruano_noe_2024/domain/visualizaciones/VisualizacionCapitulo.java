@@ -3,7 +3,7 @@ package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualiz
 import com.fasterxml.jackson.annotation.JsonView;
 
 import jakarta.persistence.Embeddable;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views;
 
 @Embeddable
 public class VisualizacionCapitulo {

@@ -17,7 +17,7 @@ import jakarta.persistence.OneToMany;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionCapitulo;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionSerie;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionTemporada;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views;
 
 @Entity
 public class Usuario {
@@ -89,18 +89,16 @@ public class Usuario {
 	 * a la factura del usuario.
 	 */
 	public void registraVisualizacion(Capitulo c) {
-		Serie sTmp = c.getTemporada().getSerie();
+		Temporada tTmp = c.getTemporada();
+		Serie sTmp = tTmp.getSerie();
 
 		/* Se registra el comienzo de una serie si no se había visualizado aún
 		 * ningún capítulo de esta */
 		if (!seriesEmpezadas.containsKey(sTmp.getId()))
 			seriesEmpezadas.put(sTmp.getId(), sTmp);
 
-		/* Si es el último capítulo de la serie, esta se considera terminada */
-		if (c.getIndice() == c.getTemporada().getCapitulos().size() &&
-			c.getTemporada().getIndice() == c.getTemporada().getSerie().getNumTemporadas())
-			seriesEmpezadas.remove(c.getTemporada().getSerie().getId());
-
+		/* Se computa el importe a cobrar por la visualización en función del tipo
+		 * de serie o la suscripción del usuario */
 		CategoriaSerie categoria = sTmp.getCategoria();
 		double importe = (cuotaFija) ? PrecioVisualizacion.CUOTA_FIJA :
 						((categoria == CategoriaSerie.ESTANDAR)	? PrecioVisualizacion.PRECIO_ESTANDAR :
@@ -110,23 +108,26 @@ public class Usuario {
 		// Se anhade la visualizacion del capitulo a la última factura
 		facturas.getLast().anhadeCargo(new Cargo(LocalDateTime.now(),
 												 importe,
-												 c.getTemporada().getSerie(),
-												 c.getTemporada().getIndice(),
+												 sTmp.getTitulo(),
+												 tTmp.getIndice(),
 												 c.getIndice()));
 
 		/* Se anhade la serie a la que pertenece el capítulo al listado de
 		 * series vistas si el capítulo es el último de la serie */
-		if (c.isUltimoCapituloSerie()) seriesTerminadas.put(sTmp.getId(), sTmp);
+		if (c.isUltimoCapituloSerie()) {
+			seriesEmpezadas.remove(sTmp.getId());
+			seriesTerminadas.put(sTmp.getId(), sTmp);
+		}
 
 		// Se registra la visualizacion del capitulo
 		long idSerie = sTmp.getId();
-		int indiceTemprada = c.getTemporada().getIndice();
+		int indiceTemprada = tTmp.getIndice();
 
 		if (visualizacionesSeries.get(idSerie) == null) {
 			/* Si no se ha visualizado ningún capítulo de la serie a la que
 			 * pertenece el capítulo, se registra la visualización de la serie */
 			VisualizacionSerie vs = new VisualizacionSerie(sTmp);
-			VisualizacionTemporada vt = new VisualizacionTemporada(c.getTemporada().getIndice());
+			VisualizacionTemporada vt = new VisualizacionTemporada(tTmp.getIndice());
 			vt.addVisualizacionCapitulo(new VisualizacionCapitulo(c.getIndice()));
 			vs.addVisualizacionTemporada(vt);
 
@@ -134,7 +135,7 @@ public class Usuario {
 		} else if (visualizacionesSeries.get(idSerie).getVisualizacionesTemporada(indiceTemprada) == null) {
 			/* Si no se ha visualizado ningún capítulo de la temporada a la que
 			 * pertenece el capítulo, se registra la visualización de la temporada */
-			VisualizacionTemporada vt = new VisualizacionTemporada(c.getTemporada().getIndice());
+			VisualizacionTemporada vt = new VisualizacionTemporada(tTmp.getIndice());
 			vt.addVisualizacionCapitulo(new VisualizacionCapitulo(c.getIndice()));
 
 			visualizacionesSeries.get(idSerie).addVisualizacionTemporada(vt);

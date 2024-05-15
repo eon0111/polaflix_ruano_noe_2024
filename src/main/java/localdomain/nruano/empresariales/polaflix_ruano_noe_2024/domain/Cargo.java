@@ -5,8 +5,7 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.ManyToMany;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views;
 
 @Embeddable
 public class Cargo {
@@ -17,9 +16,8 @@ public class Cargo {
 	@JsonView(Views.DatosFacturas.class)
 	private double importe;
 
-	@ManyToMany
 	@JsonView(Views.DatosFacturas.class)
-	private Serie serie;
+	private String tituloSerie;
 
 	@JsonView(Views.DatosFacturas.class)
 	private int indTemporada;
@@ -38,10 +36,10 @@ public class Cargo {
 	 * @param importe el importe a cobrar por la visualizacion
 	 */
 	public Cargo(LocalDateTime fechaVisualizacion, double importe,
-				 Serie serie, int indTemporada, int indCapitulo) {
+				 String tituloSerie, int indTemporada, int indCapitulo) {
 		this.fechaVisualizacion = fechaVisualizacion;
 		this.importe = importe;
-		this.serie = serie;
+		this.tituloSerie = tituloSerie;
 		this.indTemporada = indTemporada;
 		this.indCapitulo = indCapitulo;
 	}
@@ -51,7 +49,7 @@ public class Cargo {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((fechaVisualizacion == null) ? 0 : fechaVisualizacion.hashCode());
-		result = prime * result + ((serie == null) ? 0 : serie.hashCode());
+		result = prime * result + ((tituloSerie == null) ? 0 : tituloSerie.hashCode());
 		result = prime * result + indTemporada;
 		result = prime * result + indCapitulo;
 		return result;
@@ -69,8 +67,8 @@ public class Cargo {
 			!fechaVisualizacion.equals(other.fechaVisualizacion)) {
 			return false;
 		}
-		if (serie == null && other.serie != null ||
-			(!serie.equals(other.serie) || indTemporada != other.indTemporada ||
+		if (tituloSerie == null && other.tituloSerie != null ||
+			(!tituloSerie.equals(other.tituloSerie) || indTemporada != other.indTemporada ||
 			indCapitulo != other.indCapitulo)) {
 			return false;
 		}
@@ -87,8 +85,8 @@ public class Cargo {
 		return importe;
 	}
 
-	public Serie getSerie() {
-		return serie;
+	public String getTituloSerie() {
+		return tituloSerie;
 	}
 
 	public int getIndTemporada() {
@@ -109,8 +107,8 @@ public class Cargo {
 		this.importe = importe;
 	}
 
-	public void setSerie(Serie serie) {
-		this.serie = serie;
+	public void setTituloSerie(String tituloSerie) {
+		this.tituloSerie = tituloSerie;
 	}
 
 	public void setIndTemporada(int indTemporada) {

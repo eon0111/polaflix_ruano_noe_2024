@@ -17,8 +17,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api.Views;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views;
 
 @Entity
 public class Serie {
@@ -113,8 +112,8 @@ public class Serie {
 		return temporadas;
 	}
 
-	public Temporada getTemporadaByIndice(int indice) {
-		return temporadas.get(indice);
+	public Temporada getTemporada(int indice) {
+		return temporadas.get(indice - 1);
 	}
 
 	public int getNumTemporadas() {

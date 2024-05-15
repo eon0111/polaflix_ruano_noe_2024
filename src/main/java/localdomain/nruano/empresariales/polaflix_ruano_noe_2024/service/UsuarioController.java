@@ -1,10 +1,7 @@
-package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.api;
+package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Factura;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Serie;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Temporada;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Usuario;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionSerie;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.repositories.UsuarioRepository;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
@@ -40,7 +36,8 @@ public class UsuarioController {
     @GetMapping(value = "/{nombre}")
 	@JsonView(Views.DatosUsuario.class)
 	public ResponseEntity<Usuario> obtenerUsuario(@PathVariable("nombre") String nombreUsuario) {
-		if (nombreUsuario == null) return ResponseEntity.badRequest().build();
+		if (nombreUsuario == null)
+			return ResponseEntity.badRequest().build();
 		
 		Usuario u = ur.getReferenceById(nombreUsuario);
 
@@ -48,29 +45,45 @@ public class UsuarioController {
 	}
 
 	@GetMapping(value = "/{nombre}/facturas")
-	@JsonView(Views.DatosTemporada.class)
-	public ResponseEntity<ArrayList<Factura>> obtenerFacturas(
+	@JsonView(Views.DatosFacturas.class)
+	public ResponseEntity<List<Factura>> obtenerFacturas(
 			@PathVariable("nombre") String nombreUsuario) {
-		if (nombreUsuario == null) return ResponseEntity.badRequest().build();
+		if (nombreUsuario == null)
+			return ResponseEntity.badRequest().build();
 
-		ArrayList<Factura> f = (ArrayList<Factura>)ur.getReferenceById(nombreUsuario).getFacturas();
+		List<Factura> f = ur.getReferenceById(nombreUsuario).getFacturas();
 		
 		return (f != null) ? ResponseEntity.ok(f) : ResponseEntity.notFound().build();
 	}
 
-	@GetMapping("/{nombre}/visualizaciones")
+	@GetMapping(value = "/{nombre}/visualizaciones")
+	@JsonView(Views.DatosVisualizaciones.class)
 	public ResponseEntity<Map<Long, VisualizacionSerie>> obtenerVisualizaciones(
-			@RequestParam("nombre") String nombreUsuario) {
+			@PathVariable("nombre") String nombreUsuario) {
 		if (nombreUsuario == null)
-		return ResponseEntity.badRequest().build();
+			return ResponseEntity.badRequest().build();
 
-		HashMap<Long, VisualizacionSerie> v = (HashMap<Long, VisualizacionSerie>) ur.getReferenceById(nombreUsuario)
+		Map<Long, VisualizacionSerie> v = ur.getReferenceById(nombreUsuario)
 				.getVisualizacionesSeries();
 
 		return (v != null) ? ResponseEntity.ok(v) : ResponseEntity.notFound().build();
 	}
 
-	// TODO: obtenerUltimaTemporadaSerie(long idSerie) -> /{nombre}/seriesEmpezadas/{id}/ultimaTemporada
-	// TODO: hacer uno de estos por cada tipo de serie (+ pendientes, + terminadas)
+	@GetMapping(value = "/{nombre}/series/{id}")
+	@JsonView(Views.DatosTemporada.class)
+	public ResponseEntity<Temporada> obtenerUltimaTemporadaSerie(
+			@PathVariable("nombre") String nombreUsuario,
+			@PathVariable("id") Long idSerie) {
+		if (nombreUsuario == null || idSerie == null)
+			return ResponseEntity.badRequest().build();
+
+		Temporada t = ur.getReferenceById(nombreUsuario).getUltimaTemporadaSerie(idSerie);
+
+		return (t != null) ? ResponseEntity.ok(t) : ResponseEntity.notFound().build();
+	}
+
+	// TODO: registraVisualizacion
+
+	// TODO: anhadeSeriePendiente
 
 }
