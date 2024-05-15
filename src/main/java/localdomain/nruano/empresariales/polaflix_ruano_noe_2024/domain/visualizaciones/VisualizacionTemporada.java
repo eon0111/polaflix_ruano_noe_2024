@@ -19,11 +19,11 @@ public class VisualizacionTemporada {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @JsonView(Views.DatosVisualizaciones.class)
+    @JsonView(Views.DatosVisualizacion.class)
     private int indice;
 
     @ElementCollection
-    @JsonView(Views.DatosVisualizaciones.class)
+    @JsonView(Views.DatosVisualizacion.class)
     private Map<Integer, VisualizacionCapitulo> capitulosVistos;
 
     public VisualizacionTemporada() { }

@@ -1,5 +1,6 @@
 package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -7,15 +8,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import jakarta.transaction.Transactional;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Capitulo;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Factura;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Serie;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Temporada;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Usuario;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionCapitulo;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionSerie;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.repositories.SerieRepository;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.repositories.UsuarioRepository;
 
 
@@ -25,6 +32,9 @@ public class UsuarioController {
 
 	@Autowired
 	UsuarioRepository ur;
+
+	@Autowired
+	SerieRepository sr;
 
     /**
      * Busca un usuario en la plataforma.
@@ -57,14 +67,14 @@ public class UsuarioController {
 	}
 
 	@GetMapping(value = "/{nombre}/visualizaciones")
-	@JsonView(Views.DatosVisualizaciones.class)
+	@JsonView(Views.DatosVisualizacion.class)
 	public ResponseEntity<Map<Long, VisualizacionSerie>> obtenerVisualizaciones(
 			@PathVariable("nombre") String nombreUsuario) {
 		if (nombreUsuario == null)
 			return ResponseEntity.badRequest().build();
 
 		Map<Long, VisualizacionSerie> v = ur.getReferenceById(nombreUsuario)
-				.getVisualizacionesSeries();
+											.getVisualizacionesSeries();
 
 		return (v != null) ? ResponseEntity.ok(v) : ResponseEntity.notFound().build();
 	}
@@ -82,7 +92,36 @@ public class UsuarioController {
 		return (t != null) ? ResponseEntity.ok(t) : ResponseEntity.notFound().build();
 	}
 
-	// TODO: registraVisualizacion
+	@PutMapping(value = "/{nombre}/visualizaciones/{idSerie}/{indTemp}/{indCap}")
+	@JsonView(Views.DatosVisualizacion.class)
+	@Transactional
+	public ResponseEntity<VisualizacionCapitulo> registraVisualizacion(
+			@PathVariable("nombre") String nombreUsuario,
+			@PathVariable("idSerie") Long idSerie,
+			@PathVariable("indTemp") int indTemp,
+			@PathVariable("indCap") int indCap) {
+		if (nombreUsuario == null || idSerie == null)
+			return ResponseEntity.badRequest().build();
+
+		Usuario u = ur.findByNombre(nombreUsuario);
+		if (u == null) return ResponseEntity.notFound().build();
+
+		Serie s = sr.findById(idSerie).get();
+		if (s == null) return ResponseEntity.notFound().build();
+
+		Temporada t = s.getTemporada(indTemp);
+		if (t == null) return ResponseEntity.notFound().build();
+
+		Capitulo c = t.getCapitulo(indCap);
+		if (c == null) return ResponseEntity.notFound().build();
+
+		/* Una vez realizadas todas las comprobaciones se registra la visualización */
+		VisualizacionCapitulo vc = u.registraVisualizacion(c);
+
+		return (vc != null) ? ResponseEntity.ok(vc) : ResponseEntity.notFound().build();
+	}
+
+	// TODO: anhadeUsuario
 
 	// TODO: anhadeSeriePendiente
 

@@ -5,7 +5,7 @@ public class Views {
     public static class DatosUsuario {};
     public static class DatosSerie {};
     public static class DatosTemporada {};
-    public static class DatosVisualizaciones {};
+    public static class DatosVisualizacion {};
     public static class DatosFacturas {};
 
 }

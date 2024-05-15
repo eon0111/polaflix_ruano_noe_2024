@@ -21,7 +21,7 @@ public class SerieController {
     @Autowired
     SerieRepository sr;
 
-    @GetMapping
+    @GetMapping(value = "/{inicial}")
     @JsonView(Views.DatosSerie.class)
     public ResponseEntity<ArrayList<Serie>> obtenerSeriesPorInicial(@PathVariable("inicial") char inicial) {
         ArrayList<Serie> s = sr.findByTituloStartingWith(inicial);
@@ -35,5 +35,7 @@ public class SerieController {
 
 		return result; 	
     }
+
+    // TODO: anhadeSerie
 
 }

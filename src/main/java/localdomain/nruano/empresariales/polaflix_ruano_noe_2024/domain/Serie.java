@@ -29,7 +29,7 @@ public class Serie {
 	@JsonView({ Views.DatosSerie.class,
 				Views.DatosUsuario.class,
 				Views.DatosTemporada.class,
-				Views.DatosVisualizaciones.class })
+				Views.DatosVisualizacion.class })
 	private String titulo;
 
 	@Enumerated(EnumType.STRING)
@@ -113,7 +113,7 @@ public class Serie {
 	}
 
 	public Temporada getTemporada(int indice) {
-		return temporadas.get(indice - 1);
+		return (indice < 1 || indice > getNumTemporadas()) ? null : temporadas.get(indice - 1);
 	}
 
 	public int getNumTemporadas() {

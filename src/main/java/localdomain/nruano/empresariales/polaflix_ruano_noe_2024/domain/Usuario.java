@@ -39,7 +39,7 @@ public class Usuario {
 	/* Un mapa que, por cada serie visualizada y por cada temporada de esas
 	 * series, alberga las visualizaciones de cada capítulo */
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JsonView(Views.DatosVisualizaciones.class)
+	@JsonView(Views.DatosVisualizacion.class)
 	private Map<Long, VisualizacionSerie> visualizacionesSeries;
 
 	@ManyToMany
@@ -88,7 +88,7 @@ public class Usuario {
 	 * Registra la visualización de un capítulo y anhade el cargo correspondiente
 	 * a la factura del usuario.
 	 */
-	public void registraVisualizacion(Capitulo c) {
+	public VisualizacionCapitulo registraVisualizacion(Capitulo c) {
 		Temporada tTmp = c.getTemporada();
 		Serie sTmp = tTmp.getSerie();
 
@@ -123,27 +123,38 @@ public class Usuario {
 		long idSerie = sTmp.getId();
 		int indiceTemprada = tTmp.getIndice();
 
-		if (visualizacionesSeries.get(idSerie) == null) {
+		VisualizacionSerie vsTmp = visualizacionesSeries.get(idSerie);
+		VisualizacionCapitulo vc = null;
+
+		if (vsTmp == null) {
 			/* Si no se ha visualizado ningún capítulo de la serie a la que
 			 * pertenece el capítulo, se registra la visualización de la serie */
 			VisualizacionSerie vs = new VisualizacionSerie(sTmp);
 			VisualizacionTemporada vt = new VisualizacionTemporada(tTmp.getIndice());
-			vt.addVisualizacionCapitulo(new VisualizacionCapitulo(c.getIndice()));
+			vc = new VisualizacionCapitulo(c.getIndice());
+
+			vt.addVisualizacionCapitulo(vc);
 			vs.addVisualizacionTemporada(vt);
 
 			visualizacionesSeries.put(idSerie, vs);
-		} else if (visualizacionesSeries.get(idSerie).getVisualizacionesTemporada(indiceTemprada) == null) {
+		} else if (vsTmp.getVisualizacionesCapitulos(indiceTemprada) == null) {
 			/* Si no se ha visualizado ningún capítulo de la temporada a la que
 			 * pertenece el capítulo, se registra la visualización de la temporada */
 			VisualizacionTemporada vt = new VisualizacionTemporada(tTmp.getIndice());
-			vt.addVisualizacionCapitulo(new VisualizacionCapitulo(c.getIndice()));
+			vc = new VisualizacionCapitulo(c.getIndice());
 
-			visualizacionesSeries.get(idSerie).addVisualizacionTemporada(vt);
+			vt.addVisualizacionCapitulo(vc);
+
+			vsTmp.addVisualizacionTemporada(vt);
 		} else {
 			/* Se registra la visualización del capítulo una vez comprobado que
 			 * se han visualizado capítulos de la misma temporada */
-			visualizacionesSeries.get(idSerie).addVisualizacionCapitulo(c);
+			vsTmp.addVisualizacionCapitulo(c);
+
+			vc = vsTmp.getVisualizacionCapitulo(c.getTemporada().getIndice(), c.getIndice());
 		}
+
+		return vc;
 	}
 
 	/**

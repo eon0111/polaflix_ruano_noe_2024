@@ -8,7 +8,7 @@ import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views;
 @Embeddable
 public class VisualizacionCapitulo {
 
-    @JsonView(Views.DatosVisualizaciones.class)
+    @JsonView(Views.DatosVisualizacion.class)
     private int indice;
 
     protected VisualizacionCapitulo() { }

@@ -119,9 +119,9 @@ public class AppFeeder implements CommandLineRunner {
 
 	private void testFindByTitulo(String titulo, boolean esperado) {
 		System.out.println("[*] Buscando serie \"" + titulo + "\"");
-		Serie s = sr.findByTitulo(titulo);
+		ArrayList<Serie> s = sr.findByTitulo(titulo);
 
-		if (s != null && s.getTitulo().equals(titulo))
+		if (!s.isEmpty() && s.getFirst().getTitulo().equals(titulo))
 			System.out.println(((esperado) ? "-- PASS --" : "-- FAIL --"));
 		else
 			System.out.println(((!esperado) ? "-- PASS --" : "-- FAIL --"));
@@ -146,8 +146,8 @@ public class AppFeeder implements CommandLineRunner {
 
 		/* Comprueba que la serie, sus temporadas y los capítulos de estas se han
 		 * registrado correctamente */
-		System.out.println("[*] Serie registrada: \"" + sr.findByTitulo("Test").getTitulo() + "\"");
-		for (Temporada t: sr.findByTitulo("Test").getTemporadas()) {
+		System.out.println("[*] Serie registrada: \"" + sr.findByTitulo("Test").getFirst().getTitulo() + "\"");
+		for (Temporada t: sr.findByTitulo("Test").getFirst().getTemporadas()) {
 			System.out.println("  >> Temporada " + t.getIndice() + ":");
 			for (Capitulo c: t.getCapitulos()) {
 				System.out.println("    -- Capitulo: " + c.getIndice() + "\": " + c.getTitulo() + "\"");
@@ -343,7 +343,7 @@ public class AppFeeder implements CommandLineRunner {
 
 		/* Anhade una serie pendiente */
 		System.out.println("\n[*] Anhadiendo serie pendiente: \"The Office\"");
-		u.addSeriePendiente(sr.findByTitulo("The Office"));
+		u.addSeriePendiente(sr.findByTitulo("The Office").getFirst());
 		muestraSeriesUsuario(u);
 
 		System.out.println("\n==========================================");

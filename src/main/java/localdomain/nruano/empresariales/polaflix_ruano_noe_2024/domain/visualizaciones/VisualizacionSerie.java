@@ -17,7 +17,7 @@ import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Capitulo;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Serie;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Temporada;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views.DatosVisualizaciones;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views.DatosVisualizacion;
 
 @Entity
 public class VisualizacionSerie {
@@ -26,12 +26,12 @@ public class VisualizacionSerie {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @JsonView(Views.DatosVisualizaciones.class)
+    @JsonView(Views.DatosVisualizacion.class)
     @ManyToOne
     private Serie serie;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonView(DatosVisualizaciones.class)
+    @JsonView(DatosVisualizacion.class)
     private Map<Integer, VisualizacionTemporada> visualizacionesTemporadas;
 
     protected VisualizacionSerie() { }
@@ -104,8 +104,14 @@ public class VisualizacionSerie {
         return visualizacionesTemporadas;
     }
 
-    public VisualizacionTemporada getVisualizacionesTemporada(int indiceTemporada) {
-        return visualizacionesTemporadas.get(indiceTemporada);
+    public VisualizacionTemporada getVisualizacionesCapitulos(int indTemp) {
+        return visualizacionesTemporadas.get(indTemp);
+    }
+
+    public VisualizacionCapitulo getVisualizacionCapitulo(int indTemp, int indCap) {
+        return visualizacionesTemporadas.get(indTemp)
+                                        .getCapitulosVistos()
+                                        .get(indCap);
     }
 
     /****** SETTERS ******/
