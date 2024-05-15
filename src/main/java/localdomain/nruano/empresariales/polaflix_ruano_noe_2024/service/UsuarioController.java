@@ -2,13 +2,14 @@ package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,6 +61,45 @@ public class UsuarioController {
 		return (u != null) ? ResponseEntity.ok(u) : ResponseEntity.notFound().build();
 	}
 
+	@Transactional
+	@PostMapping
+	public ResponseEntity<Usuario> anhadirUsuario(
+			@RequestBody @JsonView(Views.NuevoUsuario.class) Usuario u) {
+
+		ResponseEntity<Usuario> result;
+		
+		if (ur.existsById(u.getNombre())) {
+			result = ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		} else {
+			u = ur.save(u);
+			
+			URI resourceLink = null;
+			try {
+				resourceLink = new URI("/usuarios/" + u.getNombre());
+			} catch (URISyntaxException e) { }
+			
+			result = ResponseEntity.created(resourceLink).build();
+		}
+		
+		return result;
+	}
+
+	@Transactional
+	@DeleteMapping(value = "/{nombre}")
+	public ResponseEntity<Usuario> eliminarUsuario(@PathVariable("nombre") String nombre) {
+
+		ResponseEntity<Usuario> result;
+		
+		if (!ur.existsById(nombre)) {
+			result = ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		} else {
+			ur.deleteById(nombre);
+			result = ResponseEntity.ok(null);
+		}
+		
+		return result;
+	}
+
 	@GetMapping(value = "/{nombre}/facturas")
 	@JsonView(Views.DatosFacturas.class)
 	public ResponseEntity<List<Factura>> obtenerFacturas(
@@ -101,10 +141,10 @@ public class UsuarioController {
 		return (t != null) ? ResponseEntity.ok(t) : ResponseEntity.notFound().build();
 	}
 
+	@Transactional
 	@PutMapping(value = "/{nombre}/visualizaciones/{idSerie}/{indTemp}/{indCap}")
 	@JsonView(Views.DatosVisualizacion.class)
-	@Transactional
-	public ResponseEntity<VisualizacionCapitulo> registraVisualizacion(
+	public ResponseEntity<VisualizacionCapitulo> registrarVisualizacion(
 			@PathVariable("nombre") String nombreUsuario,
 			@PathVariable("idSerie") Long idSerie,
 			@PathVariable("indTemp") int indTemp,
@@ -131,8 +171,33 @@ public class UsuarioController {
 		return (vc != null) ? ResponseEntity.ok(vc) : ResponseEntity.notFound().build();
 	}
 
-	// TODO: anhadeUsuario
+	@Transactional
+	@PutMapping(value = "/{nombre}/series-pendientes/{idSerie}")
+	@JsonView(Views.DatosVisualizacion.class)
+	public ResponseEntity<Serie> anhadirSeriePendiente(
+			@PathVariable("nombre") String nombreUsuario,
+			@PathVariable("idSerie") Long idSerie) {
 
-	// TODO: anhadeSeriePendiente
+		if (nombreUsuario == null || idSerie == null)
+			return ResponseEntity.badRequest().build();
+
+		Usuario u = ur.findByNombre(nombreUsuario);
+		if (u == null) return ResponseEntity.notFound().build();
+
+		Serie s = sr.findById(idSerie).get();
+		if (s == null) return ResponseEntity.notFound().build();
+
+		if (u.getSeriesPendientes().containsKey(idSerie) ||
+				u.getSeriesEmpezadas().containsKey(idSerie) ||
+				u.getSeriesTerminadas().containsKey(idSerie)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
+
+		/* Una vez realizadas todas las comprobaciones se registra la serie como
+		 * pendiente */
+		u.addSeriePendiente(s);
+
+		return ResponseEntity.ok(s);
+	}
 
 }

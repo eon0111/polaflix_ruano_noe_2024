@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonView;
 
 import java.time.LocalDateTime;
 import java.util.Stack;
+
+import javax.swing.text.View;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,13 +33,17 @@ import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views;
 public class Usuario {
 
 	@Id
-	@JsonView(Views.DatosUsuario.class)
+	@JsonView({ Views.DatosUsuario.class,
+				Views.NuevoUsuario.class })
 	private String nombre;
 
+	@JsonView(Views.NuevoUsuario.class)
 	private String contrasenha;
 
+	@JsonView(Views.NuevoUsuario.class)
 	private boolean cuotaFija;
 
+	@JsonView(Views.NuevoUsuario.class)
 	private String iban;
 
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)

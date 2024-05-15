@@ -8,4 +8,6 @@ public class Views {
     public static class DatosVisualizacion {};
     public static class DatosFacturas {};
 
+    public static class NuevoUsuario {};
+
 }
