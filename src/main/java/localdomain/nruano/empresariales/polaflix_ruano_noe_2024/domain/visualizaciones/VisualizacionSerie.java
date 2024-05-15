@@ -13,9 +13,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Capitulo;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Serie;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Temporada;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.Capitulo;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.Serie;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.Temporada;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service.Views.DatosVisualizacion;
 

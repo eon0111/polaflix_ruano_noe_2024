@@ -1,25 +1,30 @@
 package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
 import jakarta.transaction.Transactional;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Capitulo;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Factura;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Serie;
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Temporada;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Usuario;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.facturacion.Factura;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.Capitulo;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.Serie;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.Temporada;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionCapitulo;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionSerie;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.repositories.SerieRepository;
@@ -46,6 +51,7 @@ public class UsuarioController {
     @GetMapping(value = "/{nombre}")
 	@JsonView(Views.DatosUsuario.class)
 	public ResponseEntity<Usuario> obtenerUsuario(@PathVariable("nombre") String nombreUsuario) {
+
 		if (nombreUsuario == null)
 			return ResponseEntity.badRequest().build();
 		
@@ -58,6 +64,7 @@ public class UsuarioController {
 	@JsonView(Views.DatosFacturas.class)
 	public ResponseEntity<List<Factura>> obtenerFacturas(
 			@PathVariable("nombre") String nombreUsuario) {
+
 		if (nombreUsuario == null)
 			return ResponseEntity.badRequest().build();
 
@@ -70,6 +77,7 @@ public class UsuarioController {
 	@JsonView(Views.DatosVisualizacion.class)
 	public ResponseEntity<Map<Long, VisualizacionSerie>> obtenerVisualizaciones(
 			@PathVariable("nombre") String nombreUsuario) {
+
 		if (nombreUsuario == null)
 			return ResponseEntity.badRequest().build();
 
@@ -84,6 +92,7 @@ public class UsuarioController {
 	public ResponseEntity<Temporada> obtenerUltimaTemporadaSerie(
 			@PathVariable("nombre") String nombreUsuario,
 			@PathVariable("id") Long idSerie) {
+
 		if (nombreUsuario == null || idSerie == null)
 			return ResponseEntity.badRequest().build();
 
@@ -100,6 +109,7 @@ public class UsuarioController {
 			@PathVariable("idSerie") Long idSerie,
 			@PathVariable("indTemp") int indTemp,
 			@PathVariable("indCap") int indCap) {
+
 		if (nombreUsuario == null || idSerie == null)
 			return ResponseEntity.badRequest().build();
 

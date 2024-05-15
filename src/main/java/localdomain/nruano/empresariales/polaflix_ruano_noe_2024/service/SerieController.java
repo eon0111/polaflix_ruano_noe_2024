@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Serie;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.Serie;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.repositories.SerieRepository;
 
 @RestController

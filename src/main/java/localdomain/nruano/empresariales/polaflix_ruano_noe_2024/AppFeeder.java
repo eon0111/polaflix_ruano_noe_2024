@@ -8,6 +8,12 @@ import org.springframework.stereotype.Component;
 
 import jakarta.transaction.Transactional;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.*;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.facturacion.Cargo;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.facturacion.Factura;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.Capitulo;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.CategoriaSerie;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.Serie;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.Temporada;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionCapitulo;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionSerie;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionTemporada;
