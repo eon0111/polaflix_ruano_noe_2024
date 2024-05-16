@@ -1,7 +1,5 @@
 package localdomain.nruano.empresariales.polaflix_ruano_noe_2024.service;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fasterxml.jackson.annotation.JsonView;
 
 import jakarta.transaction.Transactional;
+
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.Usuario;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.facturacion.Factura;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.Capitulo;
@@ -58,6 +57,14 @@ public class UsuarioController {
 		return (u.isPresent()) ? ResponseEntity.ok(u) : ResponseEntity.notFound().build();
 	}
 
+	/**
+	 * Retorna las facturas de un usuario.
+	 * @param nombreUsuario el nombre del usuario
+	 * @return la respuesta HTTP que corresponda al resultado de la búsqueda (200
+     * si existe algún usuario en la plataforma con el nombre indicado, cuyas
+	 * facturas puedan recuperarse, 404 en caso de no encontrar al usuario en la
+	 * plataforma o 400 en caso de no haber indicado el nombre del usuario)
+	 */
 	@GetMapping(value = "/{nombre}/facturas")
 	@JsonView(Views.DatosFacturas.class)
 	public ResponseEntity<List<Factura>> obtenerFacturas(
@@ -73,6 +80,14 @@ public class UsuarioController {
 		return ResponseEntity.ok(f);
 	}
 
+	/**
+	 * Retorna las visualizaciones de un usuario.
+	 * @param nombreUsuario el nombre del usuario
+	 * @return la respuesta HTTP que corresponda al resultado de la búsqueda (200
+     * si existe algún usuario en la plataforma con el nombre indicado, cuyas
+	 * visualizaciones puedan recuperarse, 404 en caso de que no encontrar al
+	 * usuario, o 400 en caso de no haber indicado el nombre del usuario)
+	 */
 	@GetMapping(value = "/{nombre}/visualizaciones")
 	@JsonView(Views.DatosVisualizacion.class)
 	public ResponseEntity<Map<Long, VisualizacionSerie>> obtenerVisualizaciones(
@@ -89,6 +104,16 @@ public class UsuarioController {
 		return ResponseEntity.ok(v);
 	}
 
+	/**
+	 * Para una serie y usuario concretos, retorna la última temporada de esa
+	 * serie que fue visualizada por el usuario.
+	 * @param nombreUsuario el nombre del usuario
+	 * @param idSerie el ID de la serie
+	 * @return la respuesta HTTP que corresponda al resultado de la búsqueda
+	 * (200 para indicar una terminación correcta de la operación, 400 en caso
+	 * de no haber indicado un nombre de usuario o ID de serie válido, o 404 en
+	 * caso de no haber encontrado un usuario o serie con el nombre o ID indicado)
+	 */
 	@GetMapping(value = "/{nombre}/series/{id}")
 	@JsonView(Views.DatosTemporada.class)
 	public ResponseEntity<Temporada> obtenerUltimaTemporadaSerie(
@@ -105,6 +130,18 @@ public class UsuarioController {
 		return (t != null) ? ResponseEntity.ok(t) : ResponseEntity.notFound().build();
 	}
 
+	/**
+	 * Registra la visualización de un capítulo por parte de un usuario de la
+	 * plataforma.
+	 * @param nombreUsuario el nombre del usuario
+	 * @param idSerie el ID de la serie a la que pertenece el capítulo
+	 * @param indTemp el índice de la temporada a la que pertenece el capítulo
+	 * @param indCap el índice del capítulo dentro de la temporada
+	 * @return la respuesta HTTP correspondiente al resultado de la operación
+	 * (200 en caso de una terminación correcta de la operación, 400 en caso de
+	 * haber indicado un nombre de usuario o ID no válido, o 404 en caso de no
+	 * haber encontrado un usuario o serie con el nombre o ID indicados)
+	 */
 	@Transactional
 	@PutMapping(value = "/{nombre}/visualizaciones/{idSerie}/{indTemp}/{indCap}")
 	@JsonView(Views.DatosVisualizacion.class)
@@ -134,6 +171,16 @@ public class UsuarioController {
 		return ResponseEntity.ok(null);
 	}
 
+	/**
+	 * Anhade una serie a la lista de series pendientes de un usuario de la
+	 * plataforma.
+	 * @param nombreUsuario el nombre del usuario
+	 * @param idSerie el ID de la serie a anhadir
+	 * @return la respuesta HTTP correspondiente al resultado de la operación
+	 * (200 en caso de una terminación correcta de la operación, 400 en caso de
+	 * haber indicado un nombre de usuario o ID de la serie no válido, o 404 en
+	 * caso de no haber encontrado un usuario o serie con el nombre o ID indicado)
+	 */
 	@Transactional
 	@PutMapping(value = "/{nombre}/series-pendientes/{idSerie}")
 	@JsonView(Views.DatosSerie.class)
