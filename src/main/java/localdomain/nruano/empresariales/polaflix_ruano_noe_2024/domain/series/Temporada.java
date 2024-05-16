@@ -22,7 +22,8 @@ public class Temporada {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@JsonView(Views.DatosTemporada.class)
+	@JsonView( {Views.DatosTemporada.class,
+				Views.NuevaSerie.class })
     private int indice;
 
 	@ManyToOne

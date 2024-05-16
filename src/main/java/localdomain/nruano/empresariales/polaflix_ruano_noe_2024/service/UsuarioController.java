@@ -67,8 +67,6 @@ public class UsuarioController {
 
 		ResponseEntity<Usuario> result;
 
-		// TODO: comprobar que ninguno de los atributos requeridos del usuario sea null y elaborar la respuesta HTTP que corresponda en caso de serlo
-		
 		if (ur.existsById(u.getNombre())) {
 			result = ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		} else {

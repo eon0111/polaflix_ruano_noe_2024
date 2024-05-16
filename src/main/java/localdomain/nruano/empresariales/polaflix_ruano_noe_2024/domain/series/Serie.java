@@ -30,24 +30,30 @@ public class Serie {
 	@JsonView({ Views.DatosSerie.class,
 				Views.DatosUsuario.class,
 				Views.DatosTemporada.class,
-				Views.DatosVisualizacion.class })
+				Views.DatosVisualizacion.class,
+				Views.NuevaSerie.class })
 	private String titulo;
 
 	@Enumerated(EnumType.STRING)
+	@JsonView(Views.NuevaSerie.class)
 	private CategoriaSerie categoria;
 
-	@JsonView(Views.DatosSerie.class)
+	@JsonView({ Views.DatosSerie.class,
+				Views.NuevaSerie.class })
 	private String sinopsis;
 
 	@OneToMany(mappedBy = "serie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonView(Views.NuevaSerie.class)
 	private List<Temporada> temporadas;
 
 	@ElementCollection(fetch = FetchType.LAZY)
-	@JsonView(Views.DatosSerie.class)
+	@JsonView({ Views.DatosSerie.class,
+				Views.NuevaSerie.class })
 	private Set<PersonalSerie> creadores;
 
 	@ElementCollection(fetch = FetchType.LAZY)
-	@JsonView(Views.DatosSerie.class)
+	@JsonView({ Views.DatosSerie.class,
+				Views.NuevaSerie.class })
 	private Set<PersonalSerie> actores;
 
 	/**

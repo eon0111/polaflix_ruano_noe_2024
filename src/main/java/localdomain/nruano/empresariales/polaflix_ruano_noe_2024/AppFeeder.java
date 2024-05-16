@@ -12,6 +12,7 @@ import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.facturaci
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.facturacion.Factura;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.Capitulo;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.CategoriaSerie;
+import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.PersonalSerie;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.Serie;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.Temporada;
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.visualizaciones.VisualizacionCapitulo;
@@ -420,6 +421,12 @@ public class AppFeeder implements CommandLineRunner {
 
 	/****** FEED series *******************************************************/
 	private void feedSeries() {
+		/* -- Mr. Robot -- */
+		s1.addActor(new PersonalSerie("Rami", "Malek", ""));
+		s1.addActor(new PersonalSerie("Carly", "Chaikin", ""));
+		s1.addActor(new PersonalSerie("Christian", "Slater", ""));
+		s1.addCreador(new PersonalSerie("Sam", "Esmail", null));
+
 		/* -- Temporadas -- */
 		Temporada t1s1 = new Temporada(1, s1);
 		Temporada t2s1 = new Temporada(2, s1);

@@ -16,6 +16,11 @@ public class PersonalSerie {
 
     @JsonView(Views.DatosSerie.class)
     private String apellido2;
+
+    /*
+     * Constructor vacío.
+     */
+    protected PersonalSerie() { }
     
     /**
      * Construye el objeto que modela un creador o actor.

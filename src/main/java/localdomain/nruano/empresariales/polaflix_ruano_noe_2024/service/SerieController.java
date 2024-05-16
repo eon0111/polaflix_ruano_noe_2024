@@ -7,11 +7,13 @@ import java.util.ArrayList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -28,22 +30,23 @@ public class SerieController {
     @Autowired
     SerieRepository sr;
 
-    @GetMapping(value = "/{titulo}")
+    @GetMapping(params = "titulo")
     @JsonView(Views.DatosSerie.class)
     public ResponseEntity<ArrayList<Serie>> obtenerSeriesPorTitulo(
-            @PathVariable("titulo") String titulo) {
+            @RequestParam(required = true) String titulo) {
 
         ArrayList<Serie> s = sr.findByTitulo(titulo);
 
 		return (!s.isEmpty()) ? ResponseEntity.ok(s) : ResponseEntity.notFound().build();
     }
 
-    @GetMapping(value = "/{inicial}")
+    @GetMapping(params = "inicial")
     @JsonView(Views.DatosSerie.class)
     public ResponseEntity<ArrayList<Serie>> obtenerSeriesPorInicial(
-            @PathVariable("inicial") char inicial) {
+            @RequestParam(required = true) char inicial) {
 
-        ArrayList<Serie> s = sr.findByTituloStartingWith(inicial);
+        ArrayList<Serie> s = sr.findByTituloStartingWith(
+                (Character.isLowerCase(inicial)) ? Character.toUpperCase(inicial) : inicial);
 
 		return (!s.isEmpty()) ? ResponseEntity.ok(s) : ResponseEntity.notFound().build();
     }
@@ -53,13 +56,38 @@ public class SerieController {
 	public ResponseEntity<Serie> anhadirSerie(
 			@RequestBody @JsonView(Views.NuevaSerie.class) Serie s) {
 
-        // TODO: implementar (+ comprobar que ninguno de los atributos requeridos de la serie sea null)
+        ResponseEntity<Serie> result;
 
-        return null;
+        if (s == null) {
+            result = ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } else {
+            s = sr.save(s);
+            
+            URI resourceLink = null;
+            try {
+                resourceLink = new URI("/series/" + s.getId());
+            } catch (URISyntaxException e) { }
+            
+            result = ResponseEntity.created(resourceLink).build();
+        }
+        
+        return result;
 	}
 
-    // TODO: anhadeSerie
+    @Transactional
+	@DeleteMapping(value = "/{id}")
+	public ResponseEntity<Serie> eliminarSerie(@PathVariable("id") Long id) {
 
-    // TODO: eliminaSerie
+		ResponseEntity<Serie> result;
+		
+		if (!sr.existsById(id)) {
+			result = ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		} else {
+			sr.deleteById(id);
+			result = ResponseEntity.ok(null);
+		}
+		
+		return result;
+	}
 
 }
