@@ -4,16 +4,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,53 +48,14 @@ public class UsuarioController {
      */
     @GetMapping(value = "/{nombre}")
 	@JsonView(Views.DatosUsuario.class)
-	public ResponseEntity<Usuario> obtenerUsuario(@PathVariable("nombre") String nombreUsuario) {
+	public ResponseEntity<Optional<Usuario>> obtenerUsuario(@PathVariable("nombre") String nombreUsuario) {
 
 		if (nombreUsuario == null)
 			return ResponseEntity.badRequest().build();
 		
-		Usuario u = ur.getReferenceById(nombreUsuario);
+		Optional<Usuario> u = ur.findById(nombreUsuario);
 
-		return (u != null) ? ResponseEntity.ok(u) : ResponseEntity.notFound().build();
-	}
-
-	@Transactional
-	@PostMapping
-	public ResponseEntity<Usuario> anhadirUsuario(
-			@RequestBody @JsonView(Views.NuevoUsuario.class) Usuario u) {
-
-		ResponseEntity<Usuario> result;
-
-		if (ur.existsById(u.getNombre())) {
-			result = ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-		} else {
-			u = ur.save(u);
-			
-			URI resourceLink = null;
-			try {
-				resourceLink = new URI("/usuarios/" + u.getNombre());
-			} catch (URISyntaxException e) { }
-			
-			result = ResponseEntity.created(resourceLink).build();
-		}
-		
-		return result;
-	}
-
-	@Transactional
-	@DeleteMapping(value = "/{nombre}")
-	public ResponseEntity<Usuario> eliminarUsuario(@PathVariable("nombre") String nombre) {
-
-		ResponseEntity<Usuario> result;
-		
-		if (!ur.existsById(nombre)) {
-			result = ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-		} else {
-			ur.deleteById(nombre);
-			result = ResponseEntity.ok(null);
-		}
-		
-		return result;
+		return (u.isPresent()) ? ResponseEntity.ok(u) : ResponseEntity.notFound().build();
 	}
 
 	@GetMapping(value = "/{nombre}/facturas")
@@ -107,9 +66,11 @@ public class UsuarioController {
 		if (nombreUsuario == null)
 			return ResponseEntity.badRequest().build();
 
+		Optional<Usuario> u = ur.findById(nombreUsuario);
+		if (!u.isPresent()) return ResponseEntity.notFound().build();
+
 		List<Factura> f = ur.getReferenceById(nombreUsuario).getFacturas();
-		
-		return (f != null) ? ResponseEntity.ok(f) : ResponseEntity.notFound().build();
+		return ResponseEntity.ok(f);
 	}
 
 	@GetMapping(value = "/{nombre}/visualizaciones")
@@ -120,10 +81,12 @@ public class UsuarioController {
 		if (nombreUsuario == null)
 			return ResponseEntity.badRequest().build();
 
+		Optional<Usuario> u = ur.findById(nombreUsuario);
+		if (!u.isPresent()) return ResponseEntity.notFound().build();
+
 		Map<Long, VisualizacionSerie> v = ur.getReferenceById(nombreUsuario)
 											.getVisualizacionesSeries();
-
-		return (v != null) ? ResponseEntity.ok(v) : ResponseEntity.notFound().build();
+		return ResponseEntity.ok(v);
 	}
 
 	@GetMapping(value = "/{nombre}/series/{id}")
@@ -135,8 +98,10 @@ public class UsuarioController {
 		if (nombreUsuario == null || idSerie == null)
 			return ResponseEntity.badRequest().build();
 
-		Temporada t = ur.getReferenceById(nombreUsuario).getUltimaTemporadaSerie(idSerie);
+		Optional<Usuario> u = ur.findById(nombreUsuario);
+		if (!u.isPresent()) return ResponseEntity.notFound().build();
 
+		Temporada t = ur.getReferenceById(nombreUsuario).getUltimaTemporadaSerie(idSerie);
 		return (t != null) ? ResponseEntity.ok(t) : ResponseEntity.notFound().build();
 	}
 
@@ -152,22 +117,21 @@ public class UsuarioController {
 		if (nombreUsuario == null || idSerie == null)
 			return ResponseEntity.badRequest().build();
 
-		Usuario u = ur.findByNombre(nombreUsuario);
-		if (u == null) return ResponseEntity.notFound().build();
+		Optional<Serie> s = sr.findById(idSerie);
+		if (!s.isPresent()) return ResponseEntity.notFound().build();
 
-		Serie s = sr.findById(idSerie).get();
-		if (s == null) return ResponseEntity.notFound().build();
-
-		Temporada t = s.getTemporada(indTemp);
+		Temporada t = s.get().getTemporada(indTemp);
 		if (t == null) return ResponseEntity.notFound().build();
 
 		Capitulo c = t.getCapitulo(indCap);
 		if (c == null) return ResponseEntity.notFound().build();
 
-		/* Una vez realizadas todas las comprobaciones se registra la visualización */
-		VisualizacionCapitulo vc = u.registraVisualizacion(c);
+		Optional<Usuario> u = ur.findById(nombreUsuario);
+		if (!u.isPresent()) return ResponseEntity.notFound().build();
 
-		return (vc != null) ? ResponseEntity.ok(vc) : ResponseEntity.notFound().build();
+		/* Una vez realizadas todas las comprobaciones se registra la visualización */
+		u.get().registraVisualizacion(c);
+		return ResponseEntity.ok(null);
 	}
 
 	@Transactional
@@ -180,23 +144,21 @@ public class UsuarioController {
 		if (nombreUsuario == null || idSerie == null)
 			return ResponseEntity.badRequest().build();
 
-		Usuario u = ur.findByNombre(nombreUsuario);
-		if (u == null) return ResponseEntity.notFound().build();
+		Optional<Usuario> u = ur.findById(nombreUsuario);
+		if (!u.isPresent()) return ResponseEntity.notFound().build();
 
-		Serie s = sr.findById(idSerie).get();
-		if (s == null) return ResponseEntity.notFound().build();
+		Optional<Serie> s = sr.findById(idSerie);
+		if (!s.isPresent()) return ResponseEntity.notFound().build();
 
-		if (u.getSeriesPendientes().containsKey(idSerie) ||
-				u.getSeriesEmpezadas().containsKey(idSerie) ||
-				u.getSeriesTerminadas().containsKey(idSerie)) {
+		if (u.get().getSeriesPendientes().containsKey(idSerie)) {
 			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
 
 		/* Una vez realizadas todas las comprobaciones se registra la serie como
 		 * pendiente */
-		u.addSeriePendiente(s);
+		u.get().addSeriePendiente(s.get());
 
-		return ResponseEntity.ok(s);
+		return ResponseEntity.ok(s.get());
 	}
 
 }

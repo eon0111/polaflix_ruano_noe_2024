@@ -87,7 +87,7 @@ public class Temporada {
 	}
 
 	public Capitulo getCapitulo(int indice) {
-		return capitulos.get(indice - 1);
+		return (indice < 1 || indice > getNumCapitulos()) ? null : capitulos.get(indice - 1);
 	}
 
 	public int getNumCapitulos() {
