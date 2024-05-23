@@ -1,0 +1,25 @@
+nav {
+	background-color: #333;
+	height: 20px;
+}
+
+nav ul {
+	list-style: none;
+	padding: 0;
+	display: flex;
+	justify-content: left;
+}
+
+nav ul li {
+	margin: 0 1em;
+}
+
+nav ul li a {
+	color: white;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+nav ul li a.active {
+	text-decoration: underline;
+}

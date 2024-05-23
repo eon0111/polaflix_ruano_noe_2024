@@ -1,15 +1,14 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { HeroesComponent } from './heroes/heroes.component';
+import { RouterModule, RouterOutlet } from '@angular/router';
+import { BarraNavegacionComponent } from './barra-navegacion/barra-navegacion.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeroesComponent],
+  imports: [RouterOutlet, RouterModule, BarraNavegacionComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-
 export class AppComponent {
-  title = 'Tour of Heroes';
+  title = 'Polaflix';
 }
