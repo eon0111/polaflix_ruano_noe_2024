@@ -1,0 +1,14 @@
+<div *ngIf="usuario">
+	<app-contenedor-series
+		[tituloContenedor]="'Series terminadas'"
+		[listaSeries]="getSeries(usuario.seriesTerminadas)">
+	</app-contenedor-series>
+	<app-contenedor-series
+		[tituloContenedor]="'Series pendientes'"
+		[listaSeries]="getSeries(usuario.seriesPendientes)">
+	</app-contenedor-series>
+	<app-contenedor-series
+		[tituloContenedor]="'Series empezadas'"
+		[listaSeries]="getSeries(usuario.seriesEmpezadas)">
+	</app-contenedor-series>
+</div>

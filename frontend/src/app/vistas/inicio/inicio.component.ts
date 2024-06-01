@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { PanelSeriesComponent } from '../../componentes/panel-series/panel-series.component';
+import { PanelSeriesComponent } from './panel-series/panel-series.component';
 
 @Component({
   selector: 'app-inicio',

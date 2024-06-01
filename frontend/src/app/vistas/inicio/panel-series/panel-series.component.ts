@@ -1,13 +1,14 @@
 import { Component, Inject, Input, OnInit } from '@angular/core';
-import { Usuario } from '../../interfaces/usuario';
-import { UsuariosService } from '../../servicios/usuarios/usuarios.service';
-import { SerieUsuario } from '../../interfaces/serieUsuario';
+import { Usuario } from '../../../interfaces/usuario';
+import { UsuariosService } from '../../../servicios/usuarios/usuarios.service';
+import { SerieUsuario } from '../../../interfaces/serieUsuario';
 import { CommonModule } from '@angular/common';
+import { ContenedorSeriesComponent } from '../contenedor-series/contenedor-series.component';
 
 @Component({
   selector: 'app-panel-series',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ContenedorSeriesComponent],
   templateUrl: './panel-series.component.html',
   styleUrl: './panel-series.component.css'
 })
