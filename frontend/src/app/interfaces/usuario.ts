@@ -2,7 +2,7 @@ import { SerieUsuario } from "./serieUsuario";
 
 export interface Usuario {
 	nombre: string,
-	seriesTerminadas: Map<number, SerieUsuario>,
-	seriesPendientes: Map<number, SerieUsuario>,
-	seriesEmpezadas: Map<number, SerieUsuario>
+	seriesTerminadas: { [id: number]: SerieUsuario };
+	seriesPendientes: { [id: number]: SerieUsuario };
+	seriesEmpezadas: { [id: number]: SerieUsuario };
 }

@@ -1,0 +1,30 @@
+<div *ngIf="usuario">
+	<h2>Series de {{ usuario.nombre }}</h2>
+	<div *ngIf="getSeries(usuario.seriesTerminadas).length > 0">
+		<h3>Series Terminadas</h3>
+		<ul>
+			<li *ngFor="let serie of getSeries(usuario.seriesTerminadas)">
+				<strong>{{ serie.titulo }}</strong> (ID: {{ serie.id }})
+			</li>
+		</ul>
+	</div>
+	<div *ngIf="getSeries(usuario.seriesPendientes).length > 0">
+		<h3>Series Pendientes</h3>
+		<ul>
+			<li *ngFor="let serie of getSeries(usuario.seriesPendientes)">
+				<strong>{{ serie.titulo }}</strong> (ID: {{ serie.id }})
+			</li>
+		</ul>
+	</div>
+	<div *ngIf="getSeries(usuario.seriesEmpezadas).length > 0">
+		<h3>Series Empezadas</h3>
+		<ul>
+			<li *ngFor="let serie of getSeries(usuario.seriesEmpezadas)">
+				<strong>{{ serie.titulo }}</strong> (ID: {{ serie.id }})
+			</li>
+		</ul>
+	</div>
+</div>
+<div *ngIf="!usuario">
+	<p>No se encontró información para el usuario {{ nombreUsuario }}.</p>
+</div>

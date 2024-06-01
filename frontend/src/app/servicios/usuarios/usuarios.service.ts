@@ -8,20 +8,19 @@ import { Usuario } from '../../interfaces/usuario';
 })
 export class UsuariosService {
 
-  private usuariosUrl = 'localhost:8080/usuarios';
+  private usuariosUrl = 'http://localhost:8080/usuarios';
 
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
   };
 
   constructor(
-    private http: HttpClient) { }
+    private http: HttpClient
+  ) { }
 
   getUsuario(nombre: string): Observable<Usuario> {
     const url = `${this.usuariosUrl}/${nombre}`;
-    return this.http.get<Usuario>(url).pipe(
-      catchError(this.handleError<Usuario>(`getUsuario nombre = ${nombre}`))
-    );
+    return this.http.get<Usuario>(url).pipe();
   }
 
   private handleError<T>(operation = 'operation', result?: T) {

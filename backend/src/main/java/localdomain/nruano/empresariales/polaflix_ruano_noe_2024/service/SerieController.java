@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,6 +16,7 @@ import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.domain.series.Se
 import localdomain.nruano.empresariales.polaflix_ruano_noe_2024.repositories.SerieRepository;
 
 @RestController
+@CrossOrigin
 @RequestMapping("/series")
 public class SerieController {
 
