@@ -19,12 +19,12 @@ export class SeriesService {
   ) { }
 
   getSeriesByInicial(inicial: string): Observable<Serie[]> {
-    const url = `${this.seriesUrl}/?inicial=${inicial}`;
+    const url = `${this.seriesUrl}?inicial=${inicial}`;
     return this.http.get<Serie[]>(url).pipe();
   }
 
   getSeriesByTitulo(titulo: string): Observable<Serie[]> {
-    const url = `${this.seriesUrl}/?titulo=${titulo}`;
+    const url = `${this.seriesUrl}?titulo=${titulo}`;
     return this.http.get<Serie[]>(url).pipe();
   }
 

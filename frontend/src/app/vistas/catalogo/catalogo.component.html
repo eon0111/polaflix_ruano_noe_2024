@@ -3,5 +3,5 @@
 	<app-barra-busqueda></app-barra-busqueda>
 </div>
 <div class="panel-peliculas">
-	
+	<app-tarjeta-serie *ngFor="let serie of series" [serie]="serie"></app-tarjeta-serie>
 </div>

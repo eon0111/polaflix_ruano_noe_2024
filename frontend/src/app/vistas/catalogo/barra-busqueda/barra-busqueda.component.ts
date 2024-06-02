@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { CommBusquedaCatalogo } from '../../../servicios/comm-busqueda-catalogo/comm-busqueda-catalogo.service';
 
 @Component({
   selector: 'app-barra-busqueda',
@@ -8,5 +9,16 @@ import { Component } from '@angular/core';
   styleUrl: './barra-busqueda.component.css'
 })
 export class BarraBusquedaComponent {
+
+  @ViewChild('titulo') tituloRef!: ElementRef;
+
+  constructor(
+    private commCatalogo: CommBusquedaCatalogo
+  ) { }
+
+  clickBuscar() {
+    const titulo = this.tituloRef.nativeElement.value;
+    this.commCatalogo.enviaTitulo(titulo);
+  }
 
 }

@@ -7,3 +7,7 @@ button {
 	padding-right: 8px;
 	cursor: pointer;
 }
+
+button:hover {
+	color: var(--color-netflix);
+}
