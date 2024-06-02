@@ -1,4 +1,9 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+	--color-netflix-transparente: #e509148b;
+	--color-netflix: #e50914;
+}
+
 body {
 	background-color: black;
+	font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }

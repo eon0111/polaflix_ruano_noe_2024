@@ -1,0 +1,10 @@
+.panel-indice-busqueda {
+	color: white;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.panel-peliculas {
+	
+}
