@@ -204,7 +204,7 @@ public class Usuario {
 		if (this != obj || getClass() != obj.getClass() || obj == null)
 			return false;
 
-			Usuario other = (Usuario) obj;
+		Usuario other = (Usuario) obj;
 		if (nombre == null && other.nombre != null || nombre != other.nombre)
 			return false;
 		
