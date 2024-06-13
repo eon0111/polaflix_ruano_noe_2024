@@ -1,6 +1,28 @@
-<div class="titulo">
-	<h3>{{ serie?.titulo }}</h3>
+<div class="titulo-enlace">
+	<div class="titulo" (click)="toggleDetalles()">
+		<h3>{{ serie?.titulo }}</h3>
+	</div>
+	<div>
+		<h5 (click)="anhadePendiente(serie?.id ?? -1)">Agregar</h5>
+	</div>
 </div>
-<div class="sinopsis" id="sinpsis">
-	{{ serie?.sinopsis }}
+<div class="descripcion">
+	<div [ngClass]="{ 'detalles-mostrados': mostrarDetalles, 'detalles-ocultos': !mostrarDetalles }" class="detalles">
+		<div class="sinopsis" id="sinpsis">
+			{{ serie?.sinopsis }}
+		</div>
+		<p></p>
+		<div class="creadores">
+			<span style="font-weight: 700;">Creadores: </span>
+			<span *ngFor="let creador of serie?.creadores; let ultimo = last">
+				{{ formateaNombrePersona(creador) }}<ng-container *ngIf="!ultimo">, </ng-container>
+			</span>
+		</div>
+		<div class="actores">
+			<span style="font-weight: 700;">Actores: </span>
+			<span *ngFor="let actor of serie?.actores; let ultimo = last">
+				{{ formateaNombrePersona(actor) }}<ng-container *ngIf="!ultimo">, </ng-container>
+			</span>
+		</div>
+	</div>
 </div>

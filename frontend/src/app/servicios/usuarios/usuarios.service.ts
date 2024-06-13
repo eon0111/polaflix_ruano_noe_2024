@@ -24,10 +24,10 @@ export class UsuariosService {
     return this.http.get<Usuario>(url).pipe();
   }
 
-  //anhadeSeriePendiente(idSerie: number): Observable<Serie> {
-  //  const url = `${this.usuariosUrl}/series-pendientes/${idSerie}`;
-  //  return TODO
-  //}
+  anhadeSeriePendiente(usuario: string, idSerie: number): Observable<Serie> {
+    const url = `${this.usuariosUrl}/${usuario}/series-pendientes/${idSerie}`;
+    return this.http.put<Serie>(url, null).pipe();
+  }
 
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
