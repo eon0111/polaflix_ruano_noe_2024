@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable} from 'rxjs';
 import { Usuario } from '../../interfaces/usuario';
 import { Serie } from '../../interfaces/serie';
 
@@ -27,13 +27,6 @@ export class UsuariosService {
   anhadeSeriePendiente(usuario: string, idSerie: number): Observable<Serie> {
     const url = `${this.usuariosUrl}/${usuario}/series-pendientes/${idSerie}`;
     return this.http.put<Serie>(url, null).pipe();
-  }
-
-  private handleError<T>(operation = 'operation', result?: T) {
-    return (error: any): Observable<T> => {
-      console.error(error);
-      return of(result as T);
-    };
   }
 
 }

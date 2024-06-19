@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable} from 'rxjs';
 import { Serie } from '../../interfaces/serie';
 
 @Injectable({
@@ -28,10 +28,4 @@ export class SeriesService {
     return this.http.get<Serie[]>(url).pipe();
   }
 
-  private handleError<T>(operation = 'operation', result?: T) {
-    return (error: any): Observable<T> => {
-      console.error(error);
-      return of(result as T);
-    };
-  }
 }

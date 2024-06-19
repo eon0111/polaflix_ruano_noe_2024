@@ -14,6 +14,8 @@ export class IndiceAlfabeticoComponent {
 
   abecedario: string[] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
+  numeros: string[] = Array.from({length: 10}, (_, i) => i.toString());
+
   constructor(
     private commCatalogo: CommIndiceCatalogo
   ) { }

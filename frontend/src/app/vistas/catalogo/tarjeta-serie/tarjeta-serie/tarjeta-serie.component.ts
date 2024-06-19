@@ -3,6 +3,7 @@ import { Serie } from '../../../../interfaces/serie';
 import { CommonModule } from '@angular/common';
 import { PersonalSerie } from '../../../../interfaces/personalSerie';
 import { UsuariosService } from '../../../../servicios/usuarios/usuarios.service';
+import { catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-tarjeta-serie',
@@ -16,6 +17,7 @@ export class TarjetaSerieComponent {
   @Input() serie: Serie | null = null;
 
   mostrarDetalles: boolean = false;
+  mensajeError: string = '';
 
   constructor(
     private usuariosService: UsuariosService
@@ -32,7 +34,17 @@ export class TarjetaSerieComponent {
 
   anhadePendiente(idSerie: number): void {
     if (idSerie != -1) {
-      this.usuariosService.anhadeSeriePendiente("pacoloco", idSerie).subscribe();
+      this.usuariosService.anhadeSeriePendiente("pacoloco", idSerie).pipe(
+        catchError(error => {
+          if (error.status === 403) {
+            this.mensajeError = 'La serie ya ha sido añadida';
+            return of([]);
+          } else {
+            this.mensajeError = '';
+            throw error;
+          }
+        })
+      ).subscribe();
     }
   }
 

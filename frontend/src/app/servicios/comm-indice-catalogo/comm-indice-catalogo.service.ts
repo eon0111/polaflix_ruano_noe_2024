@@ -7,6 +7,7 @@ import { Subject } from 'rxjs';
 export class CommIndiceCatalogo {
 
   private inicialSubject = new Subject<string>();
+  private errorInicialSubject = new Subject<boolean>();
 
   inicial$ = this.inicialSubject.asObservable();
 

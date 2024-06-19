@@ -10,6 +10,7 @@ import { CabeceraComponent } from './componentes/cabecera/cabecera.component';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
+
 export class AppComponent {
   title = 'Polaflix';
 }

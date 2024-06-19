@@ -1,2 +1,2 @@
-<input type="text" placeholder="Título de la serie" #titulo>
+<input (keyup.enter)="clickBuscar()" type="text" placeholder="Título de la serie" #titulo>
 <button (click)="clickBuscar()">Buscar</button>
